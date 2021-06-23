@@ -39,9 +39,34 @@ for i=1:numel(idx)
     end
 end
 
+%turn strings to doubles, and create an array for x,y,z values
+vals=[];
+for i =1:numel(trials)
+    clear heads vals
+    vals=[];
+    n=1;
+    proc_trials = cellfun(@(x) strsplit(x,','), trials(1).data, 'UniformOutput', false);
+    for j=1:2:11
+        heads(n) = unique(cellfun(@(x) x{j}, proc_trials, 'UniformOutput', false));
+        vals(:,n)= cellfun(@str2double,(cellfun(@(x) x{j+1}, proc_trials, 'UniformOutput', false)));
+        n = n+1;
+    end
+    heads = [{'Motor'} heads];
+    mpower = trials(i).power;
+    mpower = ones(size(vals,1),1)*mpower;
+    vals = [mpower vals];
+    if ~exist('T')
+       T = array2table(vals,'VariableNames',heads);
+    else
+       nT =  array2table(vals,'VariableNames',heads);
+       T = [T;nT];
+    end
+end
 
+%T is the final table
 
-
+mapxmat(x, in_min, in_max, out_min, out_max):
+    return int((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min)
 
 
 
