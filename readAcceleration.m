@@ -1,5 +1,5 @@
 %A small program to read .txt file containing acceleration data. 
-
+clear
 %get the desired file
 [file,path] = uigetfile;
 
@@ -34,7 +34,7 @@ for i=1:numel(idx)
     trials(i).data = dat_line(idx(i)+1:idx(i+1)-1);
     trials(i).power = str2double(cell2mat(regexp(dat_line{idx(i)},'\d*','Match')));
     else
-    trials(i).data = dat_line(idx(i)+1:idx(end));
+    trials(i).data = dat_line(idx(i)+1:end);
     trials(i).power = str2double(cell2mat(regexp(dat_line{idx(i)},'\d*','Match')));
     end
 end
@@ -42,19 +42,21 @@ end
 %turn strings to doubles, and create an array for x,y,z values
 vals=[];
 for i =1:numel(trials)
-    clear heads vals
+    clear heads vals time
     vals=[];
     n=1;
-    proc_trials = cellfun(@(x) strsplit(x,','), trials(1).data, 'UniformOutput', false);
+    proc_trials = cellfun(@(x) strsplit(x,','), trials(i).data, 'UniformOutput', false);
     for j=1:2:11
         heads(n) = unique(cellfun(@(x) x{j}, proc_trials, 'UniformOutput', false));
         vals(:,n)= cellfun(@str2double,(cellfun(@(x) x{j+1}, proc_trials, 'UniformOutput', false)));
         n = n+1;
     end
-    heads = [{'Motor'} heads];
+    heads = [{'Motor'} heads {'Time'}];
     mpower = trials(i).power;
     mpower = ones(size(vals,1),1)*mpower;
     vals = [mpower vals];
+    time = cellfun(@str2double,(cellfun(@(x) x{13}, proc_trials, 'UniformOutput', false)));
+    vals = [vals time'];
     if ~exist('T')
        T = array2table(vals,'VariableNames',heads);
     else
@@ -63,10 +65,33 @@ for i =1:numel(trials)
     end
 end
 
-%T is the final table
+%T is the final table, convert from V readings to -G/G values
+newT= mapfun(table2array(T(:,2:end)),0,1023,-3000,3000);
+T{:,2:end} = newT;
 
-mapxmat(x, in_min, in_max, out_min, out_max):
-    return int((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min)
+%Plotting
+
+tested = unique(T.Motor);
+
+for i=1:numel(tested)
+    vectsum(i) = sum(abs(diff(vectcalc(T.X1(T.Motor==tested(i)),T.Y1(T.Motor==tested(i)),T.Z1(T.Motor==tested(i))))));
+end
+
+for i=1:numel(tested)
+    subplot(211) %platform A
+    vectsum = vectcalc(T.X1(T.Motor==tested(i)),T.Y1(T.Motor==tested(i)),T.Z1(T.Motor==tested(i))) ;
+    plot(T.X1(T.Motor==tested(i)))
+    hold all
+    plot(T.Y1(T.Motor==tested(i)))
+    plot(T.Z1(T.Motor==tested(i)))
+    subplot(212)
+    plot(T.X2(T.Motor==tested(i)))
+    hold all
+    plot(T.Y2(T.Motor==tested(i)))
+    plot(T.Z2(T.Motor==tested(i)))
+    pause
+    clf
+end
 
 
 
