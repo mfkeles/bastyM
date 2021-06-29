@@ -65,18 +65,26 @@ for i =1:numel(trials)
     end
 end
 
-%T is the final table, convert from V readings to -G/G values
-newT= mapfun(table2array(T(:,2:end)),0,1023,-3000,3000);
-T{:,2:end} = newT;
+%T is the final table, convert from V readings to -G/G values don't grab
+%time here
+newT= mapfun(table2array(T(:,2:end-1)),0,1023,-3000,3000);
+%take moving avg
+T{:,2:end-1} = movmean(newT,10,1);
+%downsample 
+nT = downsample(T{:,:},10); 
+nT = array2table(nT,'VariableNames',heads);
+T= nT;
 
 %Plotting
 
 tested = unique(T.Motor);
 
 for i=1:numel(tested)
-    vectsum(i) = sum(abs(diff(vectcalc(T.X1(T.Motor==tested(i)),T.Y1(T.Motor==tested(i)),T.Z1(T.Motor==tested(i))))));
+    
+    vectsum(i) = sumabs(diff(vectcalc(T.X1(T.Motor==tested(i)),T.Y1(T.Motor==tested(i)),T.Z1(T.Motor==tested(i)))));
+    %first 300 ms is the 
 end
-
+clf
 for i=1:numel(tested)
     subplot(211) %platform A
     vectsum = vectcalc(T.X1(T.Motor==tested(i)),T.Y1(T.Motor==tested(i)),T.Z1(T.Motor==tested(i))) ;
@@ -84,14 +92,19 @@ for i=1:numel(tested)
     hold all
     plot(T.Y1(T.Motor==tested(i)))
     plot(T.Z1(T.Motor==tested(i)))
+    make_it_black
     subplot(212)
     plot(T.X2(T.Motor==tested(i)))
     hold all
     plot(T.Y2(T.Motor==tested(i)))
     plot(T.Z2(T.Motor==tested(i)))
+    make_it_black;
     pause
     clf
 end
+
+
+sum(abs(diff(vectcalc(T.X1(T.Motor==tested(i)),T.Y1(T.Motor==tested(i)),T.Z1(T.Motor==tested(i))))));
 
 
 
