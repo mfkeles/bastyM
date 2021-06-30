@@ -1,4 +1,4 @@
-%A small program to read .txt file containing acceleration data. 
+%A small program to read .txt file containing acceleration data.
 clear
 %get the desired file
 [file,path] = uigetfile;
@@ -25,17 +25,17 @@ dat_line = dat_line(~cellfun('isempty',dat_line));
 %find where each trial starts "Motor Started..." is the key phrase
 idx = find(contains(dat_line,'Motor Started'));
 
-%remove the last line 
+%remove the last line
 dat_line(end)=[];
 
 %split trials
 for i=1:numel(idx)
     if idx(end) ~= idx(i)
-    trials(i).data = dat_line(idx(i)+1:idx(i+1)-1);
-    trials(i).power = str2double(cell2mat(regexp(dat_line{idx(i)},'\d*','Match')));
+        trials(i).data = dat_line(idx(i)+1:idx(i+1)-1);
+        trials(i).power = str2double(cell2mat(regexp(dat_line{idx(i)},'\d*','Match')));
     else
-    trials(i).data = dat_line(idx(i)+1:end);
-    trials(i).power = str2double(cell2mat(regexp(dat_line{idx(i)},'\d*','Match')));
+        trials(i).data = dat_line(idx(i)+1:end);
+        trials(i).power = str2double(cell2mat(regexp(dat_line{idx(i)},'\d*','Match')));
     end
 end
 
@@ -58,10 +58,10 @@ for i =1:numel(trials)
     time = cellfun(@str2double,(cellfun(@(x) x{13}, proc_trials, 'UniformOutput', false)));
     vals = [vals time'];
     if ~exist('T')
-       T = array2table(vals,'VariableNames',heads);
+        T = array2table(vals,'VariableNames',heads);
     else
-       nT =  array2table(vals,'VariableNames',heads);
-       T = [T;nT];
+        nT =  array2table(vals,'VariableNames',heads);
+        T = [T;nT];
     end
 end
 
@@ -70,43 +70,74 @@ end
 newT= mapfun(table2array(T(:,2:end-1)),0,1023,-3000,3000);
 %take moving avg
 T{:,2:end-1} = movmean(newT,10,1);
-%downsample 
-nT = downsample(T{:,:},10); 
+%downsample
+nT = downsample(T{:,:},10);
 nT = array2table(nT,'VariableNames',heads);
 T= nT;
 
 %Plotting
-
 tested = unique(T.Motor);
 
-for i=1:numel(tested)
-    
-    vectsum(i) = sumabs(diff(vectcalc(T.X1(T.Motor==tested(i)),T.Y1(T.Motor==tested(i)),T.Z1(T.Motor==tested(i)))));
-    %first 300 ms is the 
-end
+%plot without any mods
+clf
+y = [-3000 ,-3000,3000,3000];
+
+
+
 clf
 for i=1:numel(tested)
+    tloc = [];
     subplot(211) %platform A
+    pT = T(T.Motor==tested(i),:);
+    for j=100:100:500
+        tloc(end+1) = find(pT.Time==j & pT.Motor==tested(i),1);
+    end
     vectsum = vectcalc(T.X1(T.Motor==tested(i)),T.Y1(T.Motor==tested(i)),T.Z1(T.Motor==tested(i))) ;
-    plot(T.X1(T.Motor==tested(i)))
+    endloc = find(pT.Time==300 & pT.Motor==tested(i),1);
+    x=[0,endloc,endloc,0];
+    plot(T.X1(T.Motor==tested(i)),'LineWidth',1)
     hold all
-    plot(T.Y1(T.Motor==tested(i)))
-    plot(T.Z1(T.Motor==tested(i)))
+    plot(T.Y1(T.Motor==tested(i)),'LineWidth',1)
+    plot(T.Z1(T.Motor==tested(i)),'LineWidth',1)
+    ylabel('Acceleration (G)')
+    patch(x,y,'white','FaceAlpha',.15,'EdgeColor','none')
+    l = legend([{'X'} {'Y'} {'Z'}]);
+    l.TextColor = 'white';
+    l.Color = 'black';
+    title(['\color{white}Platform A \newlinePWM out: ' num2str(tested(i))])
+    box off
     make_it_black
+    ylim([-3000 3000]);
+    yticklabels(cellfun(@num2str,num2cell(-3:1:3),'un',0));
+    xticks(tloc);
+    xticklabels(cellfun(@num2str,num2cell(100:100:500),'un',0));
+    xlabel('Time (ms)');
     subplot(212)
-    plot(T.X2(T.Motor==tested(i)))
+    plot(T.X2(T.Motor==tested(i)),'LineWidth',1)
     hold all
-    plot(T.Y2(T.Motor==tested(i)))
-    plot(T.Z2(T.Motor==tested(i)))
+    plot(T.Y2(T.Motor==tested(i)),'LineWidth',1)
+    plot(T.Z2(T.Motor==tested(i)),'LineWidth',1)
+    ylim([-3000 3000]);
+    yticklabels(cellfun(@num2str,num2cell(-3:1:3),'un',0));
+    patch(x,y,'white','FaceAlpha',.15,'EdgeColor','none')
+    ylabel('Acceleration (G)')
+    box off
+    title('\color{white}Platform B')
+       xticks(tloc);
+    xticklabels(cellfun(@num2str,num2cell(100:100:500),'un',0));
     make_it_black;
-    pause
+     xlabel('Time (ms)');
+    exportgraphics(gcf,['vibrate_at_' num2str(tested(i)) '.pdf'],'Resolution',300,'ContentType','vector','BackgroundColor','k');
     clf
 end
 
-
-sum(abs(diff(vectcalc(T.X1(T.Motor==tested(i)),T.Y1(T.Motor==tested(i)),T.Z1(T.Motor==tested(i))))));
-
-
+for i=1:numel(tested)
+    %Platform A
+    plot(
+    vectsum(i) = sumabs(diff(vectcalc(T.X1(T.Motor==tested(i)),T.Y1(T.Motor==tested(i)),T.Z1(T.Motor==tested(i)))));
+    %Platform B
+    
+end
 
 
 
