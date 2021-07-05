@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from pathlib import Path
-path = "/Users/mehmetkeles/Downloads/Labeled"
+path = '/home/grover/Downloads/Labeled_V3'
 
 directory_contents = os.listdir(path)
 
