@@ -83,7 +83,7 @@ clf
 y = [-3000 ,-3000,3000,3000];
 
 
-
+plot_bin=0;
 clf
 for i=1:numel(tested)
     tloc = [];
@@ -123,22 +123,39 @@ for i=1:numel(tested)
     ylabel('Acceleration (G)')
     box off
     title('\color{white}Platform B')
-       xticks(tloc);
+    xticks(tloc);
     xticklabels(cellfun(@num2str,num2cell(100:100:500),'un',0));
     make_it_black;
-     xlabel('Time (ms)');
-    exportgraphics(gcf,['vibrate_at_' num2str(tested(i)) '.pdf'],'Resolution',300,'ContentType','vector','BackgroundColor','k');
+    xlabel('Time (ms)');
+    if plot_bin
+        exportgraphics(gcf,['vibrate_at_' num2str(tested(i)) '.pdf'],'Resolution',300,'ContentType','vector','BackgroundColor','k');
+    end
+    pause
     clf
 end
 
+clf
 for i=1:numel(tested)
     %Platform A
-    plot(
-    vectsum(i) = sumabs(diff(vectcalc(T.X1(T.Motor==tested(i)),T.Y1(T.Motor==tested(i)),T.Z1(T.Motor==tested(i)))));
+    vectsumA(i) = sumabs(vectcalc(diff(T.X1(T.Motor==tested(i))./1000),diff(T.Y1(T.Motor==tested(i))./1000),diff(T.Z1(T.Motor==tested(i))./1000)));
+    vectsumB(i) = sumabs(vectcalc(diff(T.X2(T.Motor==tested(i))./1000),diff(T.Y2(T.Motor==tested(i))./1000),diff(T.Z2(T.Motor==tested(i))./1000)));
+    
+    
     %Platform B
     
 end
-
+plot(vectsumA,'-o','LineWidth',1.5)
+hold all
+plot(vectsumB,'-o','LineWidth',1.5)
+make_it_black();
+xticklabels(cellfun(@num2str,num2cell(tested),'un',0));
+box off
+ylabel('Total Jerk (m/s^3)')
+xlabel('Raw PWM');
+l=  legend([{'Platform A'} {'Platform B'}]);
+l.TextColor = 'white';
+l.Color = 'black';
+l.Location = 'northwest';
 
 
 

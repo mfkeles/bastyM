@@ -8,7 +8,7 @@ dfs = DFS;
 set(gca, 'TickDir', 'out')
 
 
-classdef DFS < handle
+classdef DFS < handle_light
     properties
         
         
@@ -24,5 +24,8 @@ classdef DFS < handle
             
             %if no path
             if nargin == 0 || isempty(pathIN)
+                try 
+                   [FileName,PathName] = uigetfile('*.avi');
+                   obj = getTiffPath(obj, fullfile(PathName, FileName));
                 
            
