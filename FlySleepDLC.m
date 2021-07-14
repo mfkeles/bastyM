@@ -10,6 +10,11 @@ set(gca, 'TickDir', 'out')
 
 classdef DFS < handle_light
     properties
+        Fly
+        File
+        Folder
+        DLC
+        DLCfiltered
         
         
     end
@@ -27,5 +32,21 @@ classdef DFS < handle_light
                 try 
                    [FileName,PathName] = uigetfile('*.avi');
                    obj = getTiffPath(obj, fullfile(PathName, FileName));
-                
+                catch
+                end
+            end
+            
+            %if path is specified:
+            
+            if nargin>0 && ~isempty(pathIN)
+                if isa(pathIN,'char')
+                    obj = getAviPath(obj,pathIN);
+                else
+                    error('Path is not a string');
+                end
+            end
+            
+        end
+        
+            
            
