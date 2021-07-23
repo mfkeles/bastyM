@@ -2,6 +2,8 @@ function obj = getAviPath(obj,pathIN)
 
 %find file name, extension and the path
 
+obj.Path = pathIN;
+
 if isa(pathIN,'char')
     
     aviPath = [pathIN];
@@ -16,7 +18,7 @@ if isa(pathIN,'char')
     obj.Folder = [ fileparts(aviPath) filesep ];
     
     % Check if the file is DLC analyzed
-    csvList = dir([Folder File 'DLC*.csv']);
+    csvList = dir([obj.Folder obj.File 'DLC*.csv']);
     
     if isempty(csvList)
         %DLC not analyzed

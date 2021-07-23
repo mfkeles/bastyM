@@ -15,15 +15,25 @@ classdef DFS < handle_light
         Folder
         DLC
         DLCfiltered
-        
+        Path
+        DateInt
+        TimeInt
+        Created
+        Modified
         
     end
     
-    properties (Access = private)
+    properties (Transient)
+        
+        Frames
+    end
+    
+    
+    properties (SetAccess = private)
         
     end
     
-    methods
+    methods %Constructor - creates object
         
         function  obj = DFS(pathIN)
             
@@ -31,7 +41,7 @@ classdef DFS < handle_light
             if nargin == 0 || isempty(pathIN)
                 try 
                    [FileName,PathName] = uigetfile('*.avi');
-                   obj = getTiffPath(obj, fullfile(PathName, FileName));
+                   obj = getAviPath(obj, fullfile(PathName, FileName));
                 catch
                 end
             end
@@ -46,7 +56,22 @@ classdef DFS < handle_light
                 end
             end
             
+            
+            if ~isempty(obj.File)
+                getDateTime(obj);
+            
         end
+    end
+    
+    methods (Access=public)
+        
+    end
+    
+    
+end
+
+
+
         
             
            
