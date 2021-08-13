@@ -5,8 +5,10 @@ function getDLCData(obj)
 %
 
 
+%Check if the .CSV is found automatically upon object creation.  
+
+%DLC Filtered file will be attempted to load by default.
 toLoad=1;
-%Check if the .CSV is found automatically upon object creation. 
 
 if obj.ChooseFiltered
     if isempty(obj.DLCFiltered)
@@ -35,10 +37,12 @@ switch toLoad
         opts = detectImportOptions(obj.DLC);
         opts.VariableNamesLine = 2;
         obj.Data = readtable(obj.DLC,opts,'ReadVariableNames',true);
+        disp('Reading CSV file (no filtering)')
     case 2
         opts = detectImportOptions(obj.DLCFiltered);
         opts.VariableNamesLine = 2;
         obj.Data = readtable(obj.DLC,opts,'ReadVariableNames',true);
+        disp('Reading CSV file (filtered)')
     case 3
         disp(['No data loaded for ' obj.File]);
 end

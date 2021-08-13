@@ -24,7 +24,8 @@ classdef DFS < handle_light
     end
     
     properties (Transient)
-        
+        Data
+        Sensor
         Frames
     end
     
