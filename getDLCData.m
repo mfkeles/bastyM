@@ -1,11 +1,11 @@
 function getDLCData(obj)
 %GETDLCDATA Loads the .csv files associated with the DeepLabCut analysis
-%and temporarily store the data. 
+%and temporarily store the data.
 %
 %
 
 
-%Check if the .CSV is found automatically upon object creation.  
+%Check if the .CSV is found automatically upon object creation.
 
 %DLC Filtered file will be attempted to load by default.
 toLoad=1;
@@ -34,15 +34,21 @@ end
 
 switch toLoad
     case 1
-        opts = detectImportOptions(obj.DLC);
-        opts.VariableNamesLine = 2;
-        obj.Data = readtable(obj.DLC,opts,'ReadVariableNames',true);
+        loadData;
         disp('Reading CSV file (no filtering)')
     case 2
-        opts = detectImportOptions(obj.DLCFiltered);
-        opts.VariableNamesLine = 2;
-        obj.Data = readtable(obj.DLC,opts,'ReadVariableNames',true);
+        loadData
         disp('Reading CSV file (filtered)')
     case 3
         disp(['No data loaded for ' obj.File]);
 end
+
+
+    function loadData
+        opts = detectImportOptions(filename);
+        opts.VariableDescriptionsLine = 2;
+        opts.VariableUnitsLine = 3;
+        obj.Data = readtable(obj.DLC,opts,'ReadVariableNames',true);
+    end
+end
+
