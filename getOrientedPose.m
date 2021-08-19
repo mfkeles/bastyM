@@ -28,6 +28,19 @@ for i = 1:numel(names)
         right_llh = llh{:,right_part};
     end
     
+    orientations.left = [];
+    orientations.right = [];
+    orientations.idx = 1:size(llh,1);
+    
+    orientations = threshold_orientation(orientations,threshold,left_llh,right_llh);
+    
+    orientations = finalize_orientation(orientations, left_llh, right_llh);
+    
+    if ~isempty(orientations.idx)
+        error('Orientaton could not be determined for some frames.');
+    end
+    
+    
     
 end
 
@@ -50,4 +63,28 @@ end
            end
        end 
     end
+
+
+    function orientations = threshold_orientation(orientations, threshold, left_llh, right_llh)
+        left_idx = find((left_llh - right_llh)>threshold);
+        right_idx = find((right_llh - left_llh)>threshold);
+        
+        orientations.left = union(orientations.left,left_idx);
+        orientations.right = union(orientations.right,right_idx);
+        orientations.idx = setdiff(orientations.idx,orientations.left);
+        orientations.idx = setdiff(orientations.idx,orientations.right);
+    end
+
+    function orientations = finalize_orientation(orientations,left_llh,right_llh)
+        left_idx = find(left_llh > right_llh);
+        right_idx = find(right_llh >= left_llh);
+        
+        orientations.left = union(orientations.left,left_idx);
+        orientations.right = union(orientations.right,right_idx);
+        orientations.idx = setdiff(orientations.idx,orientations.left);
+        orientations.idx = setdiff(orientations.idx,orientations.right);
+    end
+
+
+        
 
