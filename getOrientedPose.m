@@ -7,8 +7,15 @@ y = getSubCoord(obj,'y');
 
 counterparts = obj.pose_cfg.("counterparts");
 connected_parts = obj.pose_cfg.("connected_parts");
+defined_points = obj.pose_cfg.("defined_points");
 
 names = fieldnames(counterparts);
+
+pose_table = table;
+llh_table = table;
+
+isTableCol = @(t, thisCol) ismember(thisCol, t.Properties.VariableNames);
+
 for i = 1:numel(names)
     left_part = counterparts.(names{i}){1};
     right_part = counterparts.(names{i}){2};
@@ -40,9 +47,54 @@ for i = 1:numel(names)
         error('Orientaton could not be determined for some frames.');
     end
     
+    x_oriented =  zeros(size(x,1),1);
+    y_oriented = zeros(size(y,1),1);
+    llh_oriented = zeros(size(llh,1),1);
     
+    x_oriented(orientations.left) = x.(left_part)(orientations.left);
+    y_oriented(orientations.left) = y.(left_part)(orientations.left);
+    llh_oriented(orientations.left) = llh.(left_part)(orientations.left);
     
+    x_oriented(orientations.right) = x.(right_part)(orientations.right);
+    y.oriented(orientations.right) = y.(right_part)(orientations.right);
+    llh_oriented(orientations.right) = llh.(right_part)(orientatons.right);
+    
+    pose_table.([names{i} "_x"]) = x_oriented;
+    pose_table.([names{i} "_y"]) = y_oriented;
+    llh_table.([names{i}]) = llh_oriented;
 end
+
+
+def_names = fieldnames(defined_points);
+
+for i = 1:numel(def_names)
+    def_xval = [];
+    def_yval = [];
+    def_llhval = [];
+    components = defined_points.(def_names{i});
+    for k = 1:numel(components)
+        if isTableCol(x,components{k}) && isTableCol(y,components{k})
+            def_xval(:,end+1) = x.(components{k});
+            def_yval(:,end+1) = y.(components{k});
+            def_llhval(:,end+1) = llh.(components{k});
+        end
+        if isTableCol(pose_table,strcat(components{k},"_x")) && isTableCol(pose_table,strcat(components{k},"_y"))
+            def_xval(:,end+1) = pose_table.(strcat(components{k},"_x"));
+            def_yval(:,end+1) = pose_table.(strcat(components{k},"_y"));
+            def_llhval(:,end+1) = llh_table.(components{k});
+        end
+        
+        pose_table.(strcat(def_names{i},"_x")) = mean(def_xval,2);
+        pose_table.(strcat(def_names{i},"_y")) = mean(def_yval,2);
+        llh_table.(def_names{i}) = mean(def_llhval,2);
+    end
+end
+
+
+
+            
+        
+    
 
 
 
