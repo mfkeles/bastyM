@@ -24,13 +24,13 @@ for i = 1:numel(names)
     connected_right = in_nested_list(connected_parts,right_part);
     
     if isempty(connected_left)
-       left_llh = mean(llh{:,connected_left},2);
+        left_llh = mean(llh{:,connected_left},2);
     else
         left_llh = llh{:,left_part};
     end
     
     if isempty(connected_right)
-       right_llh = mean(llh{:,connected_right},2);
+        right_llh = mean(llh{:,connected_right},2);
     else
         right_llh = llh{:,right_part};
     end
@@ -90,30 +90,13 @@ for i = 1:numel(def_names)
     end
 end
 
-
-
-            
-        
-    
-
-
-
-    function subData = getSubCoord(obj,ind)
-        
-        IndexC = strfind(obj.Data.Properties.VariableUnits,ind);
-        Index = find(not(cellfun('isempty',IndexC)));
-        subData = obj.Data(:,Index);
-        subData.Properties.VariableNames = obj.Data.Properties.VariableDescriptions(Index);
-        
-    end
-
     function return_list = in_nested_list(my_list,item)
         return_list = {};
-       for j=1:numel(my_list)
-           if sum(ismember(my_list{j},{item}))
-               return_list = my_list{j};
-           end
-       end 
+        for j=1:numel(my_list)
+            if sum(ismember(my_list{j},{item}))
+                return_list = my_list{j};
+            end
+        end
     end
 
 
@@ -137,6 +120,68 @@ end
         orientations.idx = setdiff(orientations.idx,orientations.right);
     end
 
+[dfPose, dfLlh] = get_pose(obj);
 
+dfPoseOriented = pose_table;
+dfLlhOriented = llh_table;
+
+end
+
+function [dfPose, dfLlh] = get_pose(obj)
+singles = obj.pose_cfg.singles;
+defined_points = obj.pose_cfg.("defined_points");
+
+llh = getSubCoord(obj,"likelihood");
+x = getSubCoord(obj,"x");
+y = getSubCoord(obj,"y");
+
+pose_table = table;
+llh_table = table;
+
+if ~numel(singles)
+    disp("Empty 'singles' in the body config")
+    singles = pllh.Properties.VariableNames;
+end
+
+for m = 1:numel(singles)
+    pose_table.(strcat(singles{m},"_x")) = x.(singles{m});
+    pose_table.(strcat(singles{m},"_y")) = y.(singles{m});
+    llh_table.(singles{m}) = pllh.(singles{m});
+end
+
+
+def_names = fieldnames(defined_points);
+
+
+for i = 1:numel(def_names)
+    components = defined_points.(def_names{i});
+    
+    if all(ismember(components,x.Properties.VariableNames)) && ...
+            all(ismember(components,y.Properties.VariableNames))
+        def_xval = mean(x{:,components},2);
+        def_yval = mean(y{:,components},2);
+        def_llhval = mean(llh{:,components},2);
         
+        pose_table.(strcat(def_names{i},"_x")) = def_xval;
+        pose_table.(strcat(def_names{i},"_y")) = def_yval;
+        llh_table.(def_names{i}) = def_llhval;
+    end
+end
+
+dfPose = pose_table;
+dfLlh = llh_table; 
+
+
+end
+
+
+function subData = getSubCoord(obj,ind)
+
+IndexC = strfind(obj.Data.Properties.VariableUnits,ind);
+Index = find(not(cellfun('isempty',IndexC)));
+subData = obj.Data(:,Index);
+subData.Properties.VariableNames = obj.Data.Properties.VariableDescriptions(Index);
+
+end
+
 
