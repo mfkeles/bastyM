@@ -1,5 +1,12 @@
-function obj = getOrientedPose(obj, threshold)
+function [dfPoseFinal,dfLlhFinal]= getOrientedPose(obj, threshold)
 
+if nargin < 2
+    if isprop(obj,'threshold') && ~isempty( obj.threshold )
+        threshold = obj.threshold;
+    else
+        threshold = 0.5;
+    end
+end
 
 llh = getSubCoord(obj,'likelihood');
 x = getSubCoord(obj,'x');
@@ -23,13 +30,13 @@ for i = 1:numel(names)
     connected_left = in_nested_list(connected_parts, left_part);
     connected_right = in_nested_list(connected_parts,right_part);
     
-    if isempty(connected_left)
+    if ~isempty(connected_left)
         left_llh = mean(llh{:,connected_left},2);
     else
         left_llh = llh{:,left_part};
     end
     
-    if isempty(connected_right)
+    if ~isempty(connected_right)
         right_llh = mean(llh{:,connected_right},2);
     else
         right_llh = llh{:,right_part};
@@ -56,11 +63,11 @@ for i = 1:numel(names)
     llh_oriented(orientations.left) = llh.(left_part)(orientations.left);
     
     x_oriented(orientations.right) = x.(right_part)(orientations.right);
-    y.oriented(orientations.right) = y.(right_part)(orientations.right);
-    llh_oriented(orientations.right) = llh.(right_part)(orientatons.right);
+    y_oriented(orientations.right) = y.(right_part)(orientations.right);
+    llh_oriented(orientations.right) = llh.(right_part)(orientations.right);
     
-    pose_table.([names{i} "_x"]) = x_oriented;
-    pose_table.([names{i} "_y"]) = y_oriented;
+    pose_table.(strcat(names{i},"_x")) = x_oriented;
+    pose_table.(strcat(names{i},"_y")) = y_oriented;
     llh_table.([names{i}]) = llh_oriented;
 end
 
@@ -125,6 +132,9 @@ end
 dfPoseOriented = pose_table;
 dfLlhOriented = llh_table;
 
+dfPoseFinal = [dfPose dfPoseOriented];
+dfLlhFinal = [dfLlh dfLlhOriented];
+
 end
 
 function [dfPose, dfLlh] = get_pose(obj)
@@ -146,7 +156,7 @@ end
 for m = 1:numel(singles)
     pose_table.(strcat(singles{m},"_x")) = x.(singles{m});
     pose_table.(strcat(singles{m},"_y")) = y.(singles{m});
-    llh_table.(singles{m}) = pllh.(singles{m});
+    llh_table.(singles{m}) = llh.(singles{m});
 end
 
 

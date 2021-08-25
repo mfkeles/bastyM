@@ -2,24 +2,22 @@
 %This software package is used to analyze and quality check the outputs of
 %DLC tracking. 
 
-dfs = DFS;
-
-
-set(gca, 'TickDir', 'out')
-
-
-classdef DFS < handle_light
+classdef FlySleepDLC < handle_light
     properties
-        Fly
-        File
-        Folder
-        DLC
-        DLCfiltered
-        Path
-        DateInt
-        TimeInt
-        Created
-        Modified
+        Fly;
+        File;
+        Folder;
+        DLC;
+        DLCfiltered;
+        Path;
+        DateInt;
+        TimeInt;
+        Created;
+        Modified;
+        ChooseFiltered =0;
+        pose_cfg
+        dfPoseFinal
+        dfLlhFinal
         
     end
     
@@ -29,6 +27,12 @@ classdef DFS < handle_light
         Frames
     end
     
+    properties (Hidden)
+        threshold
+        adaptive_llh_threshold
+        median_filter_size
+    end
+    
     
     properties (SetAccess = private)
         
@@ -36,7 +40,7 @@ classdef DFS < handle_light
     
     methods %Constructor - creates object
         
-        function  obj = DFS(pathIN)
+        function  obj = FlySleepDLC(pathIN)
             
             %if no path
             if nargin == 0 || isempty(pathIN)
@@ -58,14 +62,22 @@ classdef DFS < handle_light
             end
             
             
-            if ~isempty(obj.File)
-                getDateTime(obj);
+%             if ~isempty(obj.File)
+%                 getDateTime(obj);
+%             end
             
         end
     end
     
     methods (Access=public)
+        getDLCData(obj)
+        getDateTime(obj)
+        [dfPose, dfLlh] = getOrientedPose(obj,threshold)
+        [dfPFilt] = adaptive_llh_filter(dfPose,dfLlh,llh_threshold)
         
+    end
+    
+    methods (Static)
     end
     
     

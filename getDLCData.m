@@ -45,7 +45,7 @@ end
 
 
     function loadData
-        opts = detectImportOptions(filename);
+        opts = detectImportOptions(obj.DLC);
         opts.VariableDescriptionsLine = 2;
         opts.VariableUnitsLine = 3;
         obj.Data = readtable(obj.DLC,opts,'ReadVariableNames',true);
