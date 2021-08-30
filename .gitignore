@@ -34,7 +34,7 @@ codegen/
 *.slxc
 
 # Ignore dsstore
-*.DS_Store
+.DS_Store
 
 # Octave session info
 octave-workspace
