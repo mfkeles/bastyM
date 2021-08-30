@@ -2,6 +2,8 @@
 %This software package is used to analyze and quality check the outputs of
 %DLC tracking. 
 
+%TODO replace t with df!!!!
+
 classdef FlySleepDLC < handle_light
     properties
         Fly;
@@ -15,10 +17,8 @@ classdef FlySleepDLC < handle_light
         Created;
         Modified;
         ChooseFiltered =0;
-        pose_cfg
-        dfPoseFinal
-        dfLlhFinal
-        
+        dfPose
+        dfLlh
     end
     
     properties (Transient)
@@ -31,6 +31,8 @@ classdef FlySleepDLC < handle_light
         threshold
         adaptive_llh_threshold
         median_filter_size
+        pose_cfg
+        feature_cfg
     end
     
     
@@ -73,11 +75,13 @@ classdef FlySleepDLC < handle_light
         getDLCData(obj)
         getDateTime(obj)
         [dfPose, dfLlh] = getOrientedPose(obj,threshold)
-        [dfPFilt] = adaptive_llh_filter(dfPose,dfLlh,llh_threshold)
         
     end
     
     methods (Static)
+        [dfTemp] = adaptive_llh_filter(dfPose,dfLlh,llh_threshold)
+        [dfTemp] = median_filter(dfPose,order)
+        [cfg] = read_config(pathIN)
     end
     
     
