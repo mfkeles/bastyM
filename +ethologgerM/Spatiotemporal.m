@@ -26,37 +26,72 @@ classdef Spatiotemporal
             obj.get_mvStd = @(x) calculate_mvStd(x, winsize, fps);
         end
         
-        function extract_delta_features(obj,dfPose)
+        function tDelta = extract_delta_features(obj,dfPose)
             %returns table
             ft_cfg = obj.feature_cfg;
+            delta_scales = ft_cfg.("delta_scales");
+            
             tDelta = table;
             
-            for i=1:numel(feature_set)
-                ft_set_dt = strcat(feature_set{i},"_delta");
-                feature_cfg.(feature_set{i}) = obj.feature_cfg.(feature_set{i});
-                feature_cfg.(ft_set_dt) = obj.feature_cfg.(ft_set_dt);
+            for i=1:numel(obj.feature_set)
+                ft_set_dt = strcat(obj.feature_set{i},"_delta");
+                %                 feature_cfg.(feature_set{i}) = obj.feature_cfg.(feature_set{i});
+                %                 feature_cfg.(ft_set_dt) = obj.feature_cfg.(ft_set_dt);
                 
-                extract = extraction_functions(feature_set{i});
-                
-                temp_snap = extract(dfPose,feature_cfg.(ft_set_dt));
-                
-                if ~istable(temp_snap)
-                    temp_snap = array2table(temp_snap);
+                extract = obj.extraction_functions(obj.feature_set{i});
+                if ~isempty(ft_cfg(ft_set_dt))
+                    temp_snap = extract(dfPose,ft.(ft_set_dt));
+                    
+                    if ~istable(temp_snap)
+                        temp_snap = array2table(temp_snap);
+                    end
+                    
+                    temp_delta = calculate_delta(temp_snap,obj.delta_scales,obj.fps);  %ADD OPTION TO DO MORE THAN 1 SCALE
+                    
+                    temp_delta.Properties.VariableNames = get_column_names(obj.feature_cfg,ft_set_dt);
+                    
+                    tDelta = [tDelta temp_delta];
                 end
                 
-                temp_delta = calculate_delta(temp_snap,obj.deltaScale,obj.FPS);  %ADD OPTION TO DO MORE THAN 1 SCALE
-                
-                temp_delta.Properties.VariableNames = get_column_names(obj.feature_cfg,ft_set_dt);
-                
-                tDelta = [tDelta temp_delta];
-                
             end
-            obj.tDelta = tDelta;
             
         end
         
-        function name_column = get_column_names(obj,feature_set)
+        function tSnap = extract_snap_features(obj,dfPose)
             
+            ft_cfg = obj.feature_cfg;
+            tSnap = table;
+            
+            for i=1:numel(obj.feature_set)
+                extract = extractiont_functions(obj.feature_set{i});
+                
+                if ~isempty(ft_cfg.(obj.feature_set{i}))
+                    temp_snap = extract(dfPose,ft_cfg.(obj.feature_set{i}));
+                    if ~istable(temp_snape)
+                        temp_snap = array2table(temp_snap);
+                    end
+                    temp_snap.Properties.VariableNames = get_column_names(ft_cfg,obj.feature_set{i});
+                    tSnap = [tSnap temp_snap];
+                end
+            end
+        end
+        
+        function xy_pose_values = extract_pose(dfPose, body_parts) %returns table
+            
+            %xy_pose_values = zeros(size(dfLlh,1),numel(body_parts));
+            xy_pose_values = table;
+            for i=1:numel(body_parts)
+                col_names = [strcat(body_parts{i},"_x"),strcat(body_parts{i},"_y")];
+                tmp = dfPose(:,col_names);
+                if i ==1
+                    xy_pose_values = tmp;
+                else
+                    xy_pose_values = [xy_pose_values tmp];
+                end
+            end
+        end
+        
+        function name_column = get_column_names(obj,feature_set)
             name_column = [];
             ft_cfg = obj.feature_cfg;
             %     if strcmp(feature_set,'pose')
@@ -68,7 +103,7 @@ classdef Spatiotemporal
             %
             %     end
             try
-                tmp_cfg = obj.feature_cfg.feature_set;
+                tmp_cfg = obj.feature_cfg.(feature_set);
             catch
                 error("Unknown feature set is given")
             end
@@ -102,6 +137,43 @@ classdef Spatiotemporal
             end
             
         end
+        
+        function distance_values = extract_distance(obj,dfPose,pairs) %returns array
+            distance_values = zeros(size(dfPose,1),numel(pairs));
+            
+            for i=1:numel(pairs)
+                if isstruct(pairs{i})
+                    names = fieldnames(pairs{i});
+                    distance_group = obj.extract_distance(dfPose,pairs{i}.(names{1}));
+                    distance_values(:,i) = obj.get_group_value(distance_group,names{1});
+                else
+                    xy_values = obj.extract_pose(dfPose,pairs{i});
+                    distance_values(:,i) = cellfun(@(x) norm(x),num2cell(xy_values{:,1:2} - xy_values{:,3:4},2)); %calc euc dist
+                end
+            end
+        end
+        
+        
+        function angle_values = extract_angle(dfPose,triplets) %returns array
+            
+            angle_values = zeros(size(dfPose,1),numel(triplets));
+            f_angle = @(x) angle_between_atan2(x(:,1:2)-x(:,3:4),x(:,5:6)-x(:,3:4)); %TODO Check normalization
+            
+            for i=1:numel(triplets)
+                if isstruct(triplets{i})
+                    names = fieldnames(triplets{i});
+                    angle_group = extract_angle(dfPose,triplets{i}.(names{1}));
+                    angle_values(:,i) = get_group_value(angle_group,names{1});
+                else
+                    xy_values = table2array(extract_pose(dfPose,triplets));
+                    for j=1:size(xy_values,1)
+                        angle_values(j,i) = f_angle(xy_values(j,:));
+                    end
+                end
+            end
+            
+        end
+        
     end
     
     methods (Static)
@@ -138,97 +210,6 @@ classdef Spatiotemporal
             
         end
     end
-    
 end
 
-function compute_spatiotemporal_features(obj)
-if isempty(obj.feature_cfg)
-    disp('Feature configuration not found, attempting to load')
-end
-    function extract_snap_features(obj)
-        
-        ft_cfg = obj.feature_cfg;
-        tSnap = table;
-        
-        for i=1:numel(feature_set)
-            extract = extractiont_functions(feature_set{i});
-            
-            if ~isempty(ft_cfg.(feature_set{i}))
-                temp_snap = extract(obj.dfPose,ft_cfg.(feature_set{i}));
-                if ~istable(temp_snape)
-                    temp_snap = array2table(temp_snap;
-                end
-                temp_snap.Properties.VariableNames = get_column_names(ft_cfg,feature_set{i});
-                tSnap = [tSnap temp_snap];
-            end
-        end
-        obj.tSnap = tSnap;
-    end
 
-
-
-
-
-
-
-
-    function xy_pose_values = extract_pose(dfPose, body_parts) %returns table
-        
-        %xy_pose_values = zeros(size(dfLlh,1),numel(body_parts));
-        xy_pose_values = table;
-        for i=1:numel(body_parts)
-            col_names = [strcat(body_parts{i},"_x"),strcat(body_parts{i},"_y")];
-            tmp = dfPose(:,col_names);
-            if i ==1
-                xy_pose_values = tmp;
-            else
-                xy_pose_values = [xy_pose_values tmp];
-            end
-        end
-    end
-
-
-    function distance_values = extract_distance(dfPose,pairs) %returns array
-        distance_values = zeros(size(dfPose,1),numel(pairs));
-        
-        for i=1:numel(pairs)
-            if isstruct(pairs{i})
-                names = fieldnames(pairs{i});
-                distance_group = extract_distance(dfPose,pairs{i}.(names{1}));
-                distance_values(:,i) = get_group_value(distance_group,names{1});
-            else
-                xy_values = extract_pose(dfPose,pairs{i});
-                distance_values(:,i) = cellfun(@(x) norm(x),num2cell(xy_values{:,1:2} - xy_values{:,3:4},2)); %calc euc dist
-            end
-        end
-    end
-
-
-
-    function angle_values = extract_angle(dfPose,triplets) %returns array
-        
-        angle_values = zeros(size(dfPose,1),numel(triplets));
-        f_angle = @(x) angle_between_atan2(x(:,1:2)-x(:,3:4),x(:,5:6)-x(:,3:4)); %TODO Check normalization
-        
-        for i=1:numel(triplets)
-            
-            if isstruct(triplets{i})
-                names = fieldnames(triplets{i});
-                angle_group = extract_angle(dfPose,triplets{i}.(names{1}));
-                angle_values(:,i) = get_group_value(angle_group,names{1});
-            else
-                xy_values = table2array(extract_pose(dfPose,triplets));
-                for j=1:size(xy_values,1)
-                    angle_values(j,i) = f_angle(xy_values(j,:));
-                end
-            end
-        end
-    end
-
-    function calculate_mvMean
-    end
-
-    function calculate_mvStd
-    end
-
-end
