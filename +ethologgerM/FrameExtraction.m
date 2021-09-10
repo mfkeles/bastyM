@@ -37,6 +37,9 @@ classdef FrameExtraction
                 error(["Given threshold key" key "is not defined"])
             end
         end
+        
+        function bout_dict = set_bouts(obj,frame_val,threshold)
+            obj.threshold_indicator_labes = 
     end
     methods (Static)
         function frame_val = get_frame_values(tVal,datums)
@@ -44,11 +47,23 @@ classdef FrameExtraction
             frame_val = sum(tVal{:,datums},2);
         end
         
-        function cluster_boundaries = threshold_detection(frame_val,num_gmm_comp)%ADD LOG
+        function [cluster_boundaries, sorted_means]= threshold_detection(frame_val,num_gmm_comp)%ADD LOG
+            X=frame_val;
             GMModel = fitgmdist(frame_val,num_gmm_comp);
-            clusters = cluster
+            clusters = cluster(GMModel,X);
+            [~,idx] = sort(frame_val);
+            xc = [frame_val clusters];
+            xc_s = xc(idx,:);
             
+            X_s = xc_s(:,1);
+            clusters_s = xc_s(:,2);
+            
+            cluster_boundaries = X_s(find(diff(clusters_s))+1);
+            sorted_means = sort(GMModel.mu);
         end
         
+        function bout_dict = get_bouts(labels)
+            intvls = 
+        
     end
-    
+
