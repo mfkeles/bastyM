@@ -28,11 +28,12 @@ classdef FrameExtraction
             val_moving = obj.get_frame_values(tActivity,datums);
         end
         
-        function get_labels(obj,min_dormant,tol_duration,tol_percent,winsize,s)
+        function labels = get_labels(obj,min_dormant,tol_duration,tol_percent,winsize,s)
             min_dormant = obj.fps*min_dormant;
             tol_duration = obj.fps*tol_duration;
             winsize = obj.fps*winsize;
             tol_percent = obj.fps*tol_percent;
+            return_unresolved = 0;
             
             label_win = sliding_window(obj.threshold_indicator_labels,winsize,s); %FINISH THIS FUNCTION
             
@@ -51,8 +52,8 @@ classdef FrameExtraction
                     bout_mid = bput_start + floor(dur/2);
                     mostly_dormant = (sum(label_win(bout_mid)) / winsize) < tol_percent;
                     
-                    if short_moving && mostly_mobing;
-                        intermediate_labels(bout_start:bout_end) = -1 %indicates unresolved
+                    if short_moving && mostly_dormant
+                        intermediate_labels(bout_start:bout_end) = -1 ;%indicates unresolved
                     else
                         intermediate_labels(bout_start:bout_end) = 1;
                     end
@@ -62,7 +63,28 @@ classdef FrameExtraction
             obj.intermediate_labels = intermediate_labels;
             
             if ~return_unresolved
+                intermediate_labels(intermediate_labels==-1) = 0;
+            end
             
+            intvls = cont_intvls(intermediate_labels);
+            
+            obj.labels = zeros(size(intermediate_labels,1),1);
+            
+            for i=2:numels(intermediate_labels)
+                lbl = intermediate_labeles(intvls(i-1));
+                intvl_start = intvls(i-1);
+                intvl_end = intvls(i);
+                if (intvl_end - intvls_start < min_dormant) && lbl == 0
+                    if return_unresolved
+                        obj.labels(intvl_start:intlv_end-1)=-1;
+                    else
+                        obj.labels(intvl_start:intvl_end-1) = 1;
+                    end
+                else
+                    obj.labels(intvl_start:intvl_end-1) = lbl;
+                end
+            end          
+            labels = obj.labels;
         end
         
 
