@@ -3,14 +3,21 @@ classdef FrameExtraction
     %   Detailed explanation goes here
     
     properties
-        Property1
+        min_dormant;
+        tol_duration;
+        tol_percent;
+        winsize;
     end
     
     methods
-        function obj = F(inputArg1,inputArg2)
+        function obj = FrameExtraction(min_dormant,tol_duration,tol_percent,winsize)
             %F Construct an instance of this class
             %   Detailed explanation goes here
-            obj.Property1 = inputArg1 + inputArg2;
+            obj.min_dormant = min_dormant;
+            obj.tol_duration = tol_duration;
+            obj.tol_percent = tol_percent;
+            obj.winsize = winsize;
+      
         end
         
         function val_moving = get_movement_values(obj,tVal,datums)
@@ -21,13 +28,51 @@ classdef FrameExtraction
             val_moving = obj.get_frame_values(tActivity,datums);
         end
         
+        function get_labels(obj,min_dormant,tol_duration,tol_percent,winsize,s)
+            min_dormant = obj.fps*min_dormant;
+            tol_duration = obj.fps*tol_duration;
+            winsize = obj.fps*winsize;
+            tol_percent = obj.fps*tol_percent;
+            
+            label_win = sliding_window(obj.threshold_indicator_labels,winsize,s); %FINISH THIS FUNCTION
+            
+            intermediate_labels = zeros(numel(obj.threshold_indicator_labels),1);
+            
+            for i =1:size(obj.bout_dict,1)
+                indicator = obj.bout_dict(i,1);
+                 bout_start = obj.bout_dict(i,2);
+                    bout_end = obj.bout_dict(i,3);
+                
+                if indicator == 0 
+                    intermediate_labels(bout_start:bout_end) = 0;
+                else
+                    dur = bout_end-bout_start;
+                    short_moving = dur <tol_duration;
+                    bout_mid = bput_start + floor(dur/2);
+                    mostly_dormant = (sum(label_win(bout_mid)) / winsize) < tol_percent;
+                    
+                    if short_moving && mostly_mobing;
+                        intermediate_labels(bout_start:bout_end) = -1 %indicates unresolved
+                    else
+                        intermediate_labels(bout_start:bout_end) = 1;
+                    end
+                end
+            end
+            
+            obj.intermediate_labels = intermediate_labels;
+            
+            if ~return_unresolved
+            
+        end
+        
+
         function threshold = get_threshold(obj,frame_val,threshold_args)
             num_gmm_comp = threshold_args("n_components");
             threshold_idx = threshold_args("threshold_idx");
             
             [diff_points, cluster_means] = obj.threshold_detection(frame_val,num_gmm_comp);
             
-            key = threshold_ars("key");
+            key = threshold_args("key");
             
             if strcmp(key,"local_min")
                 threshold = diff_points(threshold_idx);
@@ -38,9 +83,12 @@ classdef FrameExtraction
             end
         end
         
-        function bout_dict = set_bouts(obj,frame_val,threshold)
-            obj.threshold_indicator_labes = 
+        function set_bouts(obj,frame_val,threshold)
+            obj.threshold_indicator_labels = frame_val>threshold;
+            obj.bout_dict = obj.get_bouts(obj.threshold_indicator_labels);
+        end
     end
+    
     methods (Static)
         function frame_val = get_frame_values(tVal,datums)
             % datum is string char
@@ -63,7 +111,13 @@ classdef FrameExtraction
         end
         
         function bout_dict = get_bouts(labels)
-            intvls = 
-        
+            intvls = cont_intvls(labels);
+            
+            for i = 2:numel(proc_labels)-1
+                indicator = labels(intvls(i-1));
+                bout_dict(i,:) = [indicator intvls(i-1), intvls(i)];
+            end
+        end
     end
+end
 
