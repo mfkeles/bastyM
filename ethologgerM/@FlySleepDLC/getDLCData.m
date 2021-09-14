@@ -1,11 +1,15 @@
 function getDLCData(obj)
 %GETDLCDATA Loads the .csv files associated with the DeepLabCut analysis
-%and temporarily store the data.
+%and temporarily stores the data.
 %
 %
 
 
 %Check if the .CSV is found automatically upon object creation.
+if isempty(obj.DLC)
+    disp("DLC path is empty")
+    return
+end
 
 %DLC Filtered file will be attempted to load by default.
 toLoad=1;

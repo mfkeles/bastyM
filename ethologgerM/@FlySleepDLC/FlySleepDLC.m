@@ -54,14 +54,26 @@ classdef FlySleepDLC < handle_light
             end
             
             %if path is specified:
-            
             if nargin>0 && ~isempty(pathIN)
+               [filename, name, ext] = fileparts(pathIN);
+               if strcmp(ext,".avi")
                 if isa(pathIN,'char')
                     obj = getAviPath(obj,pathIN);
                 else
                     error('Path is not a string');
                 end
+               elseif strcmp(ext,".csv")
+                   obj.DLC = pathIN;
+                   getDLCData(obj);
+                   obj.File = name;
+                   obj.Folder = filename;
+               else
+                   error("File extensions need to be either .csv or .avi")
+               end
+               
             end
+            
+            getConfigFiles(obj);
             
             
 %             if ~isempty(obj.File)
@@ -79,9 +91,10 @@ classdef FlySleepDLC < handle_light
     end
     
     methods (Static)
-        [dfTemp] = adaptive_llh_filter(dfPose,dfLlh,llh_threshold)
         [dfTemp] = median_filter(dfPose,order)
         [cfg] = read_config(pathIN)
+        [dfTemp,pfilt] = adaptive_llh_filter(dfPose,dfLlh);
+       
     end
     
     
