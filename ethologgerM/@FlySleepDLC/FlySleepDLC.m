@@ -93,7 +93,7 @@ classdef FlySleepDLC < handle_light
     methods (Static)
         [dfTemp] = median_filter(dfPose,order)
         [cfg] = read_config(pathIN)
-        [dfTemp,pfilt] = adaptive_llh_filter(dfPose,dfLlh);
+        [dfTemp,pfilt] = adaptive_llh_filter(dfPose,dfLlh,llh_adaptive_filter);
        
     end
     

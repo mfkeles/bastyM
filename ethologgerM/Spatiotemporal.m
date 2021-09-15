@@ -39,14 +39,14 @@ classdef Spatiotemporal
                 %                 feature_cfg.(ft_set_dt) = obj.feature_cfg.(ft_set_dt);
                 
                 extract = obj.extraction_functions(obj.feature_set{i});
-                if ~isempty(ft_cfg(ft_set_dt))
-                    temp_snap = extract(dfPose,ft.(ft_set_dt));
+                if ~isempty(ft_cfg.(ft_set_dt))
+                    temp_snap = extract(obj,dfPose,ft_cfg.(ft_set_dt));
                     
                     if ~istable(temp_snap)
                         temp_snap = array2table(temp_snap);
                     end
                     
-                    temp_delta = calculate_delta(temp_snap,obj.delta_scales,obj.fps);  %ADD OPTION TO DO MORE THAN 1 SCALE
+                    temp_delta = calculate_delta(temp_snap,delta_scales,obj.fps);  %ADD OPTION TO DO MORE THAN 1 SCALE
                     
                     temp_delta.Properties.VariableNames = get_column_names(obj.feature_cfg,ft_set_dt);
                     
@@ -72,21 +72,6 @@ classdef Spatiotemporal
                     end
                     temp_snap.Properties.VariableNames = get_column_names(ft_cfg,obj.feature_set{i});
                     tSnap = [tSnap temp_snap];
-                end
-            end
-        end
-        
-        function xy_pose_values = extract_pose(dfPose, body_parts) %returns table
-            
-            %xy_pose_values = zeros(size(dfLlh,1),numel(body_parts));
-            xy_pose_values = table;
-            for i=1:numel(body_parts)
-                col_names = [strcat(body_parts{i},"_x"),strcat(body_parts{i},"_y")];
-                tmp = dfPose(:,col_names);
-                if i ==1
-                    xy_pose_values = tmp;
-                else
-                    xy_pose_values = [xy_pose_values tmp];
                 end
             end
         end
@@ -138,6 +123,11 @@ classdef Spatiotemporal
             
         end
         
+        
+        
+    end
+    
+    methods(Access=private)
         function distance_values = extract_distance(obj,dfPose,pairs) %returns array
             distance_values = zeros(size(dfPose,1),numel(pairs));
             
@@ -152,7 +142,20 @@ classdef Spatiotemporal
                 end
             end
         end
-        
+        function xy_pose_values = extract_pose(obj,dfPose, body_parts) %returns table
+            
+            %xy_pose_values = zeros(size(dfLlh,1),numel(body_parts));
+            xy_pose_values = table;
+            for i=1:numel(body_parts)
+                col_names = [strcat(body_parts{i},"_x"),strcat(body_parts{i},"_y")];
+                tmp = dfPose(:,col_names);
+                if i ==1
+                    xy_pose_values = tmp;
+                else
+                    xy_pose_values = [xy_pose_values tmp];
+                end
+            end
+        end
         
         function angle_values = extract_angle(dfPose,triplets) %returns array
             
@@ -173,7 +176,6 @@ classdef Spatiotemporal
             end
             
         end
-        
     end
     
     methods (Static)
