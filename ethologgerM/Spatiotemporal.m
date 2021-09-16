@@ -29,7 +29,7 @@ classdef Spatiotemporal
         function tDelta = extract_delta_features(obj,dfPose)
             %returns table
             ft_cfg = obj.feature_cfg;
-            delta_scales = ft_cfg.("delta_scales");
+            delta_scales = ft_cfg.("delta_scales"){1};
             
             tDelta = table;
             
@@ -46,9 +46,9 @@ classdef Spatiotemporal
                         temp_snap = array2table(temp_snap);
                     end
                     
-                    temp_delta = calculate_delta(temp_snap,delta_scales,obj.fps);  %ADD OPTION TO DO MORE THAN 1 SCALE
+                    temp_delta = Spatiotemporal.calculate_delta(temp_snap,delta_scales,obj.fps);  %ADD OPTION TO DO MORE THAN 1 SCALE
                     
-                    temp_delta.Properties.VariableNames = get_column_names(obj.feature_cfg,ft_set_dt);
+                    temp_delta.Properties.VariableNames = get_column_names(obj,ft_set_dt);
                     
                     tDelta = [tDelta temp_delta];
                 end
@@ -95,7 +95,7 @@ classdef Spatiotemporal
             
             if contains(feature_set,"pose")
                 ft_names = cellfun(@(x) [strcat(x,"_x"), strcat(x,"_y")],ft_cfg.(feature_set),'UniformOutput',false);
-                ft_names = cellflat(ft_names);
+                ft_names = cellflat(cellfun(@(x) cellstr(x),ft_names,'UniformOutput',false));
                 
             else
                 ft_names = ft_cfg.(feature_set);
@@ -108,8 +108,8 @@ classdef Spatiotemporal
                     name_column = cellfun(@(x) strcat(feature_set,'.',get_feature_name(x)),ft_names,'UniformOutput',false);
                 end
             else
-                scales = ft_cfg.delta_scales;
-                name_column = cellfun(@(x) strcat(feature_set, '.' , get_feature_name(x), ".s",num2str(scales))); %TODO ADD MULTIPLE SCALE SUPPORT
+                scales = ft_cfg.delta_scales{1};
+                name_column = cellfun(@(x) cell2mat(strcat(feature_set, '.' , get_feature_name(x), ".s",num2str(scales))),ft_names,'UniformOutput',false); %TODO ADD MULTIPLE SCALE SUPPORT
             end
             
             function name = get_feature_name(definition)
@@ -117,14 +117,15 @@ classdef Spatiotemporal
                     fname = fieldnames(definition);
                     name = cell2mat(strcat(fieldnames(definition),'(',strjoin(cellfun(@(x) strjoin(x,'-'),definition.(fname{1}),'UniformOutput',false), ','), ')' ));
                 else
-                    name = strjoin(definition,'-');
+                    if ~iscellstr(definition)
+                        name = strjoin(cellstr(definition),'-');
+                    else
+                        name = strjoin(definition,'-');
+                    end
                 end
             end
             
         end
-        
-        
-        
     end
     
     methods(Access=private)
