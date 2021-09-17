@@ -4,7 +4,7 @@
 
 %TODO replace t with df!!!!
 
-classdef FlySleepDLC < handle_light
+classdef ethologgerM < handle_light
     properties
         Fly;
         File;
@@ -60,9 +60,10 @@ classdef FlySleepDLC < handle_light
                 if isa(pathIN,'char')
                     obj = getAviPath(obj,pathIN);
                 else
-                    error('Path is not a string');
+                    error('Path is not a string')
                 end
                elseif strcmp(ext,".csv")
+                   disp("Creating the object using the csv file...")
                    obj.DLC = pathIN;
                    getDLCData(obj);
                    obj.File = name;
