@@ -7,6 +7,9 @@ classdef FrameExtraction
         tol_duration;
         tol_percent;
         winsize;
+        fps;
+        threshold_indicator_labels;
+        bout_dict;
     end
     
     methods
@@ -135,7 +138,7 @@ classdef FrameExtraction
         function bout_dict = get_bouts(labels)
             intvls = cont_intvls(labels);
             
-            for i = 2:numel(proc_labels)-1
+            for i = 2:numel(labels)-1
                 indicator = labels(intvls(i-1));
                 bout_dict(i,:) = [indicator intvls(i-1), intvls(i)];
             end

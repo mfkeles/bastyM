@@ -42,7 +42,7 @@ classdef ethologgerM < handle_light
     
     methods %Constructor - creates object
         
-        function  obj = FlySleepDLC(pathIN)
+        function  obj = ethologgerM(pathIN)
             
             %if no path
             if nargin == 0 || isempty(pathIN)

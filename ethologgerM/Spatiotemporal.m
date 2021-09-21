@@ -26,13 +26,13 @@ classdef Spatiotemporal
             obj.get_mvStd = @(x) calculate_mvStd(x, winsize, fps);
         end
         
-        function tDelta = extract_delta_features(obj,dfPose)
+        function [tDelta,dNames] = extract_delta_features(obj,dfPose)
             %returns table
             ft_cfg = obj.feature_cfg;
             delta_scales = ft_cfg.("delta_scales"){1};
             
             tDelta = table;
-            
+            dNames = [];
             for i=1:numel(obj.feature_set)
                 ft_set_dt = strcat(obj.feature_set{i},"_delta");
                 %                 feature_cfg.(feature_set{i}) = obj.feature_cfg.(feature_set{i});
@@ -48,7 +48,9 @@ classdef Spatiotemporal
                     
                     temp_delta = Spatiotemporal.calculate_delta(temp_snap,delta_scales,obj.fps);  %ADD OPTION TO DO MORE THAN 1 SCALE
                     
-                    temp_delta.Properties.VariableNames = get_column_names(obj,ft_set_dt);
+                    tempNames = get_column_names(obj,ft_set_dt);
+                    dNames = [dNames tempNames];
+                    temp_delta.Properties.VariableNames = cellfun(@(x) matlab.lang.makeValidName(x),tempNames, 'UniformOutput',false);
                     
                     tDelta = [tDelta temp_delta];
                 end
@@ -57,20 +59,22 @@ classdef Spatiotemporal
             
         end
         
-        function tSnap = extract_snap_features(obj,dfPose)
+        function [tSnap,sNames]= extract_snap_features(obj,dfPose)
             
             ft_cfg = obj.feature_cfg;
             tSnap = table;
-            
+            sNames = [];
             for i=1:numel(obj.feature_set)
-                extract = extractiont_functions(obj.feature_set{i});
+                extract = obj.extraction_functions(obj.feature_set{i});
                 
                 if ~isempty(ft_cfg.(obj.feature_set{i}))
-                    temp_snap = extract(dfPose,ft_cfg.(obj.feature_set{i}));
-                    if ~istable(temp_snape)
+                    temp_snap = extract(obj,dfPose,ft_cfg.(obj.feature_set{i}));
+                    if ~istable(temp_snap)
                         temp_snap = array2table(temp_snap);
                     end
-                    temp_snap.Properties.VariableNames = get_column_names(ft_cfg,obj.feature_set{i});
+                    tempNames = get_column_names(obj,obj.feature_set{i});
+                    sNames = [sNames tempNames];
+                    temp_snap.Properties.VariableNames = cellfun(@(x) matlab.lang.makeValidName(x),tempNames, 'UniformOutput',false);
                     tSnap = [tSnap temp_snap];
                 end
             end
@@ -158,7 +162,7 @@ classdef Spatiotemporal
             end
         end
         
-        function angle_values = extract_angle(dfPose,triplets) %returns array
+        function angle_values = extract_angle(obj,dfPose,triplets) %returns array
             
             angle_values = zeros(size(dfPose,1),numel(triplets));
             f_angle = @(x) angle_between_atan2(x(:,1:2)-x(:,3:4),x(:,5:6)-x(:,3:4)); %TODO Check normalization
@@ -166,7 +170,7 @@ classdef Spatiotemporal
             for i=1:numel(triplets)
                 if isstruct(triplets{i})
                     names = fieldnames(triplets{i});
-                    angle_group = extract_angle(dfPose,triplets{i}.(names{1}));
+                    angle_group = obj.extract_angle(dfPose,triplets{i}.(names{1}));
                     angle_values(:,i) = get_group_value(angle_group,names{1});
                 else
                     xy_values = table2array(extract_pose(dfPose,triplets));

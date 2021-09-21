@@ -53,6 +53,10 @@ end
         opts.VariableDescriptionsLine = 2;
         opts.VariableUnitsLine = 3;
         obj.Data = readtable(obj.DLC,opts,'ReadVariableNames',true);
+        underscore_arr = cell(1,numel(obj.Data.Properties.VariableUnits));
+        underscore_arr(:) = {'_'};
+        obj.Data.Properties.VariableNames =  strcat(obj.Data.Properties.VariableDescriptions,underscore_arr,obj.Data.Properties.VariableUnits);
+        
     end
 end
 
