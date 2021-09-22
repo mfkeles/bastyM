@@ -116,8 +116,13 @@ classdef FrameExtraction
     
     methods (Static)
         function frame_val = get_frame_values(tVal,datums)
+            if iscell(datums)
+            datums = cellflat(cellfun(@(x) cellstr(x),datums,'UniformOutput',false));
+            end
+              frame_val = sum(tVal{:,datums},2);
             % datum is string char
-            frame_val = sum(tVal{:,datums},2);
+           
+            
         end
         
         function [cluster_boundaries, sorted_means]= threshold_detection(frame_val,num_gmm_comp)%ADD LOG
