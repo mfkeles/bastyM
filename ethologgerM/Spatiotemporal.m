@@ -184,6 +184,24 @@ classdef Spatiotemporal
     end
     
     methods (Static)
+        function ePose = calculate_euclidian(dfPose)
+            col_names = dfPose.Properties.VariableNames;
+            col_x = col_names(1:2:numel(col_names));
+            col_size = numel(col_names);
+           n=1;
+            for i=1:2:numel(col_names)
+                xy_values(:,1:2) = dfPose{:,i:i+1};
+                xy_values = [xy_values zeros(size(xy_values,1),size(xy_values,2))];
+            ePose(:,n) = cellfun(@(x) norm(x),num2cell(xy_values(:,1:2) - xy_values(:,3:4),2));
+            n=n+1;
+            clear xy_values
+            end
+            ePose = array2table(ePose);
+            ePose.Properties.VariableNames = cellfun(@(x) erase(x,'_x'),col_x,'UniformOutput',false);
+        end
+            
+            
+            
         
         function angle = angle_between_atan2(v1,v2)
             %https://www.mathworks.com/matlabcentral/answers/331017-calculating-angle-between-three-points
