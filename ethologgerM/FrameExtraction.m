@@ -69,7 +69,7 @@ classdef FrameExtraction
                 intermediate_labels(intermediate_labels==-1) = 0;
             end
             
-            intvls = cont_intvls(intermediate_labels);
+            intvls = Aux.cont_intvls(intermediate_labels);
             
             obj.labels = zeros(size(intermediate_labels,1),1);
             
@@ -108,7 +108,7 @@ classdef FrameExtraction
             end
         end
         
-        function set_bouts(obj,frame_val,threshold)
+        function obj = set_bouts(obj,frame_val,threshold)
             obj.threshold_indicator_labels = frame_val>threshold;
             obj.bout_dict = obj.get_bouts(obj.threshold_indicator_labels);
         end
@@ -143,7 +143,7 @@ classdef FrameExtraction
         function bout_dict = get_bouts(labels)
             intvls = cont_intvls(labels);
             
-            for i = 2:numel(labels)-1
+            for i = 2:numel(intvls)
                 indicator = labels(intvls(i-1));
                 bout_dict(i,:) = [indicator intvls(i-1), intvls(i)];
             end

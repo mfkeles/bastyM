@@ -35,9 +35,6 @@ classdef Spatiotemporal
             dNames = [];
             for i=1:numel(obj.feature_set)
                 ft_set_dt = strcat(obj.feature_set{i},"_delta");
-                %                 feature_cfg.(feature_set{i}) = obj.feature_cfg.(feature_set{i});
-                %                 feature_cfg.(ft_set_dt) = obj.feature_cfg.(ft_set_dt);
-                
                 extract = obj.extraction_functions(obj.feature_set{i});
                 if ~isempty(ft_cfg.(ft_set_dt))
                     temp_snap = extract(obj,dfPose,ft_cfg.(ft_set_dt));
@@ -153,13 +150,19 @@ classdef Spatiotemporal
             xy_pose_values = table;
             for i=1:numel(body_parts)
                 col_names = [strcat(body_parts{i},"_x"),strcat(body_parts{i},"_y")];
-                tmp = dfPose(:,col_names);
+                if strcmp(body_parts{i},"origin")
+                    tmp = array2table(ones(size(dfPose,1),2));
+                    tmp.Properties.VariableNames = col_names;
+                else
+                    tmp = dfPose(:,col_names);
+                end
                 if i ==1
                     xy_pose_values = tmp;
                 else
                     xy_pose_values = [xy_pose_values tmp];
                 end
             end
+            
         end
         
         function angle_values = extract_angle(obj,dfPose,triplets) %returns array
@@ -184,24 +187,21 @@ classdef Spatiotemporal
     end
     
     methods (Static)
-        function ePose = calculate_euclidian(dfPose)
-            col_names = dfPose.Properties.VariableNames;
-            col_x = col_names(1:2:numel(col_names));
-            col_size = numel(col_names);
-           n=1;
-            for i=1:2:numel(col_names)
-                xy_values(:,1:2) = dfPose{:,i:i+1};
-                xy_values = [xy_values zeros(size(xy_values,1),size(xy_values,2))];
-            ePose(:,n) = cellfun(@(x) norm(x),num2cell(xy_values(:,1:2) - xy_values(:,3:4),2));
-            n=n+1;
-            clear xy_values
-            end
-            ePose = array2table(ePose);
-            ePose.Properties.VariableNames = cellfun(@(x) erase(x,'_x'),col_x,'UniformOutput',false);
-        end
-            
-            
-            
+        %         function ePose = calculate_euclidian(dfPose)
+        %             col_names = dfPose.Properties.VariableNames;
+        %             col_x = col_names(1:2:numel(col_names));
+        %             col_size = numel(col_names);
+        %             n=1;
+        %             for i=1:2:numel(col_names)
+        %                 xy_values(:,1:2) = dfPose{:,i:i+1};
+        %                 xy_values = [xy_values zeros(size(xy_values,1),size(xy_values,2))];
+        %                 ePose(:,n) = cellfun(@(x) norm(x),num2cell(xy_values(:,1:2) - xy_values(:,3:4),2));
+        %                 n=n+1;
+        %                 clear xy_values
+        %             end
+        %             ePose = array2table(ePose);
+        %             ePose.Properties.VariableNames = cellfun(@(x) erase(x,'_x'),col_x,'UniformOutput',false);
+        %         end
         
         function angle = angle_between_atan2(v1,v2)
             %https://www.mathworks.com/matlabcentral/answers/331017-calculating-angle-between-three-points
@@ -231,8 +231,9 @@ classdef Spatiotemporal
             
             get_gradient = @(x) gradient(x,2);
             
-            delta_y = varfun(get_gradient,y);
+            get_abs = @abs;
             
+            delta_y = varfun(get_abs,varfun(get_gradient,y));
         end
     end
 end
