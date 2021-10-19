@@ -1,5 +1,5 @@
 function ret = sliding_window(seq,n,s)
-n= floor(n/2);
+n= fix(n/2);
 
 for i=1:s:n
     p1(i) = {seq(1:i+(n-1))};
@@ -20,5 +20,6 @@ for i=n:s:numel(seq)-1
     
 end
 ret = [p1 p2];
+end
 
 

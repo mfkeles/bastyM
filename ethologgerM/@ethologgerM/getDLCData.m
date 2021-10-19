@@ -41,7 +41,7 @@ switch toLoad
         loadData;
         disp('Reading CSV file (no filtering)')
     case 2
-        loadData
+        loadData;
         disp('Reading CSV file (filtered)')
     case 3
         disp(['No data loaded for ' obj.File]);

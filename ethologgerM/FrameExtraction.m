@@ -10,6 +10,8 @@ classdef FrameExtraction
         fps;
         threshold_indicator_labels;
         bout_dict;
+        intermediate_labels;
+        labels;
     end
     
     methods
@@ -20,7 +22,7 @@ classdef FrameExtraction
             obj.tol_duration = tol_duration;
             obj.tol_percent = tol_percent;
             obj.winsize = winsize;
-      
+            
         end
         
         function val_moving = get_movement_values(obj,tVal,datums)
@@ -32,28 +34,31 @@ classdef FrameExtraction
         end
         
         function labels = get_labels(obj,min_dormant,tol_duration,tol_percent,winsize,s)
+            if isempty(obj.fps)
+                obj.fps = 30; %this is the default
+            end
             min_dormant = obj.fps*min_dormant;
             tol_duration = obj.fps*tol_duration;
             winsize = obj.fps*winsize;
             tol_percent = obj.fps*tol_percent;
             return_unresolved = 0;
             
-            label_win = sliding_window(obj.threshold_indicator_labels,winsize,s); %FINISH THIS FUNCTION
+            label_win =  Aux.sliding_window(obj.threshold_indicator_labels,winsize,s); %FINISH THIS FUNCTION
             
             intermediate_labels = zeros(numel(obj.threshold_indicator_labels),1);
             
             for i =1:size(obj.bout_dict,1)
                 indicator = obj.bout_dict(i,1);
-                 bout_start = obj.bout_dict(i,2);
-                    bout_end = obj.bout_dict(i,3);
+                bout_start = obj.bout_dict(i,2);
+                bout_end = obj.bout_dict(i,3);
                 
-                if indicator == 0 
+                if indicator == 0
                     intermediate_labels(bout_start:bout_end) = 0;
                 else
                     dur = bout_end-bout_start;
                     short_moving = dur <tol_duration;
-                    bout_mid = bput_start + floor(dur/2);
-                    mostly_dormant = (sum(label_win(bout_mid)) / winsize) < tol_percent;
+                    bout_mid = bout_start + floor(dur/2);
+                    mostly_dormant = (sum(label_win{bout_mid}) / winsize) < tol_percent;
                     
                     if short_moving && mostly_dormant
                         intermediate_labels(bout_start:bout_end) = -1 ;%indicates unresolved
@@ -73,11 +78,11 @@ classdef FrameExtraction
             
             obj.labels = zeros(size(intermediate_labels,1),1);
             
-            for i=2:numels(intermediate_labels)
-                lbl = intermediate_labeles(intvls(i-1));
+            for i=2:numel(intvls)
+                lbl = intermediate_labels(intvls(i-1));
                 intvl_start = intvls(i-1);
                 intvl_end = intvls(i);
-                if (intvl_end - intvls_start < min_dormant) && lbl == 0
+                if (intvl_end - intvl_start < min_dormant) && lbl == 0
                     if return_unresolved
                         obj.labels(intvl_start:intlv_end-1)=-1;
                     else
@@ -86,11 +91,11 @@ classdef FrameExtraction
                 else
                     obj.labels(intvl_start:intvl_end-1) = lbl;
                 end
-            end          
+            end
             labels = obj.labels;
         end
         
-
+        
         function threshold = get_threshold(obj,frame_val,threshold_args)
             num_gmm_comp = threshold_args("n_components");
             threshold_idx = threshold_args("threshold_idx");
@@ -117,20 +122,23 @@ classdef FrameExtraction
     methods (Static)
         function frame_val = get_frame_values(tVal,datums)
             if iscell(datums)
-            datums = cellflat(cellfun(@(x) cellstr(x),datums,'UniformOutput',false));
+                datums = cellflat(cellfun(@(x) cellstr(x),datums,'UniformOutput',false));
             end
-              frame_val = sum(tVal{:,datums},2);
+            frame_val = sum(tVal{:,datums},2);
             % datum is string char
-           
-            
         end
         
-        function [cluster_boundaries, sorted_means]= threshold_detection(frame_val,num_gmm_comp)%ADD LOG
-            X=frame_val;
-            GMModel = fitgmdist(frame_val,num_gmm_comp);
+        function [cluster_boundaries, sorted_means]= threshold_detection(frame_val,num_gmm_comp)
+            log_ = false;
+            if log_
+                X=log2(frame_val+1);
+            else
+                X=frame_val;
+            end
+            GMModel = fitgmdist(X,num_gmm_comp);
             clusters = cluster(GMModel,X);
-            [~,idx] = sort(frame_val);
-            xc = [frame_val clusters];
+            [~,idx] = sort(X);
+            xc = [X clusters];
             xc_s = xc(idx,:);
             
             X_s = xc_s(:,1);
@@ -141,13 +149,15 @@ classdef FrameExtraction
         end
         
         function bout_dict = get_bouts(labels)
-            intvls = cont_intvls(labels);
+            intvls = Aux.cont_intvls(labels);
             
             for i = 2:numel(intvls)
                 indicator = labels(intvls(i-1));
                 bout_dict(i,:) = [indicator intvls(i-1), intvls(i)];
             end
+            bout_dict(1,:)=[];
         end
     end
 end
+
 
