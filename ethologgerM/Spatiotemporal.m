@@ -1,4 +1,4 @@
-classdef Spatiotemporal
+classdef Spatiotemporal < handle_light
     %SPATIOTEMPORAL Summary of this class goes here
     %   Detailed explanation goes here
     

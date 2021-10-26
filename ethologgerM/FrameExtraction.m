@@ -1,4 +1,4 @@
-classdef FrameExtraction
+classdef FrameExtraction < handle_light
     %F Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -33,7 +33,7 @@ classdef FrameExtraction
             val_moving = obj.get_frame_values(tActivity,datums);
         end
         
-        function labels = get_labels(obj,min_dormant,tol_duration,tol_percent,winsize,s)
+        function [labels,obj] = get_labels(obj,min_dormant,tol_duration,tol_percent,winsize,s)
             if isempty(obj.fps)
                 obj.fps = 30; %this is the default
             end
@@ -120,6 +120,21 @@ classdef FrameExtraction
     end
     
     methods (Static)
+        function expt_item = get_dormant_intervals(dormant_moving_labels)
+            expt_item.mask = dormant_moving_labels==0;
+            dormant_intervals = [];
+            
+            intervals = unique(Aux.cont_intvls(dormant_moving_labels));
+            
+            for i=2:numel(intervals)
+                if dormant_moving_labels(intervals(i-1)) == 0;
+                    dormant_intervals(end+1,:) = [intervals(i-1) intervals(i)];
+                end
+            end 
+            expt_item.dormant_intervals = dormant_intervals;
+        end
+        
+        
         function frame_val = get_frame_values(tVal,datums)
             if iscell(datums)
                 datums = cellflat(cellfun(@(x) cellstr(x),datums,'UniformOutput',false));
@@ -157,6 +172,15 @@ classdef FrameExtraction
             end
             bout_dict(1,:)=[];
         end
+        
+        function [tsSnap,tsLlh] = slice_dormant_intervals(tSnap,dfLlh,dormant_intervals)
+            
+            for i=1:size(dormant_intervals,1)
+                tsSnap{i} = tSnap(dormant_intervals(i,1):dormant_intervals(i,2),:);
+                tsLlh{i} = dfLlh(dormant_intervals(i,1):dormant_intervals(i,2),:);
+            end
+        end
+        
     end
 end
 
