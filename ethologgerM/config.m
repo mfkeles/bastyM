@@ -11,7 +11,9 @@ CFG.ANNOTATION_PRIORITY = [
 CFG.ADAPTIVE_LLH_THRESHOLD = 0.2;
 CFG.MEDIAN_FILTER_SIZE = 6;
 CFG.MOVING_THRESHOLD_ARGS = containers.Map(["n_components","threshold_idx","key"], {2,1,"local_max"});
-CFG.REST_INTERVALS_ARGS = containers.Map(["min_rest","tol_duration","tol_percent","winsize"],{300,60,0.4,180});
+CFG.DORMANT_INTERVALS_ARGS = containers.Map(["min_rest","tol_duration","tol_percent","winsize"],{300,60,0.4,180});
+
+CFG.WAVELET_PARAMS = containers.Map(["WaveletParameters","FrequencyBandwith"],{[3,60],[0.25,1]});
 
 CFG.ACTIVITY_THRESHOLD_ARGS = containers.Map(["n_components","threshold_idx","key"], {2,1,"local_max"});
 
@@ -53,3 +55,4 @@ CFG.ACTIVITY_DATUMS_LIST = {
 %     "verbose": True,
 % }
 % SERIAL_DEPENDENCY_ARGS = {"winsize": 30 * 20, "stepsize": 30 * 10}
+save('config.mat','CFG');

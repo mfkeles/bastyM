@@ -13,14 +13,31 @@ classdef ProbExtract < handle_light
             obj.Property1 = inputArg1 + inputArg2;
         end
         
-        function outputArg = method1(tSnap,expt_item)
+        function outputArg = calcWavelets(obj,tsSnap,CFG)
             %Calculate prob positions
-            if sum(strcmp(fieldnames(tSnap),'distance_origin_prob')) && sum(strmcp(fieldnames(tSnap),'distance_origin_thor_post'))
+            
+            waveparams = CFG.WAVELET_PARAMS('WaveletParameters');
+            freqparams = CFG.WAVELET_PARAMS('FrequencyBandwith');
+            
+            for i=1:numel(tsSnap)
+                fb = cwtfilterbank('SignalLength', size(tsSnap{i},1),'SamplingFrequency',30,'FrequencyLimits',freqparams,'WaveletParameters',waveparams);
+                getScale = @(x) scaleSpectrum(fb,x);
+                wsSnap{i} = varfun(getScale,tsSnap{i});
+            end
+        end
+            
+        function
+            
+        end
+        
+            
+            
+            if sum(strcmp(fieldnames(tsSnap),'distance_origin_prob')) && sum(strmcp(fieldnames(tsSnap),'distance_origin_thor_post'))
                 dormant_intervals = expt_item.dormant_intervals;
                 
                 for i=1:size(dormant_intervals,1)
-                    sliced_intervals.prob{i} = tSnap.distance_origin_prob(dormant_intervals(i,1):dormant_intervals(i,2));
-                    sliced_intervals.thor_post{i} = tSnap.distance_origin_thor_post(dormant_intervals(i,1):dormant_intervals(i,2));
+                    sliced_intervals.prob{i} = tsSnap.distance_origin_prob(dormant_intervals(i,1):dormant_intervals(i,2));
+                    sliced_intervals.thor_post{i} = tsSnap.distance_origin_thor_post(dormant_intervals(i,1):dormant_intervals(i,2));
                     
                     fb = cwtfilterbank('SignalLength',numel(dormant_probs{2}),'SamplingFrequency',30,'FrequencyLimits',[0.25 1]);
                     savgprob = cellfun(@(x) scaleSpectrum(fb,x),sliced_intervals.prob,'UniformOutput',false);
