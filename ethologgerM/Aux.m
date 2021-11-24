@@ -11,10 +11,10 @@ classdef Aux
             intvls = [1; (find(diff(labels))+1);size(labels,1)];
         end
         
-        function intvl_locs = rem_overlap_intvls(intvl_locs,col)
-            while sum(diff(intvl_locs(:,col))<0)
-                idx = find(diff(intvl_locs(:,col))<0,1);
-                intvl_locs(idx,col) = intvl_locs(idx+1,col);
+        function intvl_locs = rem_overlap_intvls(intvl_locs)
+            while sum(diff(intvl_locs(:,1))<0)
+                idx = find(diff(intvl_locs(:,1))<0,1);
+                intvl_locs(idx,1) = intvl_locs(idx+1,1);
             end
             
             while sum(arrayfun(@(x) intvl_locs(x,2)<intvl_locs(x+1,2) && intvl_locs(x,2)>intvl_locs(x+1,1),1:size(intvl_locs,1)-1))
@@ -24,22 +24,40 @@ classdef Aux
                     end
                 end
             end
-        intvl_locs = unique(intvl_locs,'rows');
-        
-        
-        [counts, values] = histcounts(intvl_locs(:,2),min(intvl_locs(:,2))-1:max(intvl_locs(:,2)+1));
-        repeatedElements = values(counts >= 2);
-        repeatedLocs = arrayfun(@(x) find(intvl_locs(:,2)==x),repeatedElements,'UniformOutput',false);
-        keepLocs=setDiff(1:size(intvl_locs,1),cell2mat(repeatedLocs'));
-        clean_intvls = intvl_locs(keepLocs,:);
-        selectedStartLocs = cellfun(@(x) min(intvl_locs(x,1)),repeatedLocs,'UniformOutput',false);
-        selectedEndLocs = cellfun(@(x) unique(intvl_locs(intvl_locs(:,1)==x,2)),selectedStartLocs,'UniformOutput',false);
-        add_intvls = [cell2mat(selectedStartLocs)' cell2mat(selectedEndLocs)'];
-        clean_intvls = [clean_intvls;add_intvls];
+            intvl_locs = unique(intvl_locs,'rows');
             
-        
+            
+            [counts, values] = histcounts(intvl_locs(:,2),min(intvl_locs(:,2))-1:max(intvl_locs(:,2)+1));
+            repeatedElements = values(counts >= 2);
+            repeatedLocs = arrayfun(@(x) find(intvl_locs(:,2)==x),repeatedElements,'UniformOutput',false);
+            keepLocs=setdiff(1:size(intvl_locs,1),cell2mat(repeatedLocs'));
+            clean_intvls = intvl_locs(keepLocs,:);
+            selectedStartLocs = cellfun(@(x) min(intvl_locs(x,1)),repeatedLocs,'UniformOutput',false);
+            selectedEndLocs = cellfun(@(x) unique(intvl_locs(intvl_locs(:,1)==x,2)),selectedStartLocs,'UniformOutput',false);
+            add_intvls = [cell2mat(selectedStartLocs)' cell2mat(selectedEndLocs)'];
+            clean_intvls =sortrows([clean_intvls;add_intvls]);
+            
+            while sum(arrayfun(@(x) clean_intvls(x,1)>clean_intvls(x-1,1) && clean_intvls(x,2)<clean_intvls(x-1,2),2:size(clean_intvls,1)))
+                rem_intvls = [];
+                for i=2:size(clean_intvls,1)
+                    if clean_intvls(i,1)>clean_intvls(i-1,1) && clean_intvls(i,2)<clean_intvls(i-1,2)
+                        rem_intvls(end+1) = i;
+                    end
+                end
+                clean_intvls(rem_intvls,:) = [];
+            end
+             intvl_locs = clean_intvls;
         end
         
+       
+        
+        function synthetic_trace = generate_synthetic_set(numOfPeaks)
+            %generates a synthetic prob pump trace.
+            synth = sinc(-1.8:1/20:1.8);
+            synth = synth+abs(min(x));
+            synthetic_trace = arrayfun(@(x) repmat(synth,1,x),1:numOfPeaks,'UniformOutput',false);
+            
+        end
         
         function ret = sliding_window(seq,n,s)
             n= fix(n/2);

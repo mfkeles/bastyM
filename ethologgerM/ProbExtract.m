@@ -62,7 +62,9 @@ classdef ProbExtract < handle_light
                
                 intvl_locs(intvl_locs(:,1)<1,1) = 1;
                 intvl_locs(intvl_locs(:,2)>numel(tsSnap{i}.distance_origin_prob),2) = numel(tsSnap{i}.distance_origin_prob);
- 
+                
+                intvl_locs = Aux.rem_overlap_intvls(intvl_locs);
+                
                 extractedPeaks{i}  = arrayfun(@(x) tsSnap{i}.distance_origin_prob(intvl_locs(x,1):intvl_locs(x,2)),1:size(intvl_locs,1),'UniformOutput',false);
             end
             
