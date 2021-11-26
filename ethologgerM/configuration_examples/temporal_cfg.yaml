@@ -1,0 +1,32 @@
+# For time-stamps and figures.
+fps: 30
+
+wt:
+  wavelet: morl
+  padding: reflect
+  freq_up: 10
+  freq_low: 0.1
+  n_channels: 20
+
+windows:
+  winsize: 600
+  # If chunk is True, then stepsize is ignored.
+  stepsize: 60
+  # method: 'count' or 'tf-idf'
+  method: tf-idf
+  # wintype: scipy.signal.get_window (must require no parameters)
+  # If method is tf-idf then this must be boxcar.
+  wintype: boxcar
+  # norm: (Optional) 'l1' or 'l2'
+  # If not given default is None.
+  # If method: tf-idf then default is 'l1' 
+  # norm: l1
+
+## ssm:
+##   # name: 'WeakLimitHDPHSMM' or 'StickyWeakLimitHDPHMM'
+##   name: WeakLimitHDPHSMM
+##   obs_dim: 2
+##   kwargs:
+##     alpha: 100
+##     gamma: 100
+##     init_state_concentration: 2

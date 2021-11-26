@@ -1,4 +1,4 @@
-classdef Aux
+classdef AuxFunc
     %UNTITLED Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -59,9 +59,23 @@ classdef Aux
             
         end
         
-        function ret = sliding_window(seq,n,s)
-            n= fix(n/2);
+        function save_snap_fts(tSnap,sNames,obj,saveascsv)
+            %save Snap Features 
+            tmp_arr = table2array(tSnap);
+            if saveascsv
+                writematrix(tmp_arr,fullfile(obj.Folder,'snapfts.csv'));
+                writecell(sNames,fullfile(obj.Folder,'snapNames.csv'));
+                save(fullfile(obj.Folder,'tSnap.mat'),'tSnap','sNames');
+            else
+                 save(fullfile(obj.Folder,'tSnap.mat'),'tSnap','sNames');
+                
+            end
             
+        end 
+   
+        
+        function ret = sliding_window(seq,n,s)
+            n= fix(n/2);  
             for i=1:s:n
                 p1(i) = {seq(1:i+(n-1))};
             end

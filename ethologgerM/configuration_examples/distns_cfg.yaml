@@ -1,0 +1,133 @@
+# - DistnClass:
+#     keyword-argumet_0: [param0_0, param0_1, ... param0_2] # list of hyperparam kwarg_0
+#     keyword-argumet_1: [param1_0, param1_1, ... param1_2] # list of hyperparam kwarg_1
+#     ...
+# Above item generates n of DistnClass, with parameters kwarg_0[0...n], kwarg_1[0...n]
+#
+# Total number of observation distributions must be equal to total number of
+# duration distributions, which is also equal to Nmax.
+
+# Python expressions are allowed (with numpy, as np), i.e. mu_0: np.zeros(obs_dim)+1
+
+## observations:
+##   Multinomial:
+##     K: [8, 8, 8, 8, 8, 8]
+##     alpha_0: [2, 2, 2, 2, 2, 2]
+## 
+## 
+## durations:
+##   Poisson:
+##     alpha_0: [20, 20, 20]
+##     beta_0: [5, 5, 5]
+## 
+##   NegativeBinomialFixedR:
+##     alpha_0: [20, 20, 20]
+##     beta_0: [5, 5, 5]
+##     r: [15, 15, 15]
+
+# NOTE:
+# Categorical
+#   This class represents a categorical distribution over labels, where the
+#   parameter is weights and the prior is a Dirichlet distribution.
+#
+#   For example, if K == 3, then five samples may look like [0,1,0,2,1]
+#   Each entry is the label of a sample, like the outcome of die rolls. In
+#   other words, generated data or data passed to log_likelihood are indices,
+#   not indicator variables!
+#
+#   This class can be used as a weak limit approximation for a DP, particularly
+#   by calling __init__ with alpha_0 and K arguments, in which case the prior
+#   will be a symmetric Dirichlet with K components and parameter alpha_0/K;
+#   K is then the weak limit approximation parameter.
+#
+#   Hyperparaemters:
+#     alphav_0 (vector) OR alpha_0 (scalar) and K
+#   Parameters:
+#     weights, a vector encoding a finite pmf
+#
+#
+# CategoricalAndConcentration
+#   Categorical with resampling of the symmetric Dirichlet concentration
+#   parameter.
+#     concentration ~ Gamma(a_0,b_0)
+#
+#   The Dirichlet prior over pi is then
+#     pi ~ Dir(concentration/K)
+#
+#
+# Multinomial
+#   Like Categorical but the data are counts, so _get_statistics is overridden
+#   (though _get_weighted_statistics can stay the same!). log_likelihood also
+#   changes since, just like for the binomial special case, we sum over all
+#   possible orderings.
+#
+#   For example, if K == 3, then a sample with n=5 might be array([2,2,1])
+#
+#
+# Poissson
+#   Poisson distribution with a conjugate Gamma prior.
+#
+#   Hyperparameters (following Wikipedia's notation):
+#     alpha_0, beta_0
+#   Parameter is the mean/variance parameter:
+#     lmbda
+#
+#
+# NegativeBinomial
+#   Negative Binomial distribution with a conjugate beta prior on p and a
+#   separate gamma prior on r.
+#
+#   Hyperparameters:
+#     k_0, theta_0: r ~ Gamma(k, theta)
+#                   or r = np.random.gamma(k,theta)
+#     alpha_0, beta_0: p ~ Beta(alpha,beta)
+#                 or p = np.random.beta(alpha,beta)
+#   Parameters:
+#     r
+#     p
+#
+#
+# NegativeBinomialIntegerR
+#   Nonconjugate Discrete+Beta prior, r_discrete_distribution is an array where
+#   index i is p(r=i+1)
+#
+# NegativeBinomialIntegerR2
+#
+#
+# NegativeBinomialFixedR
+#
+#
+# Geometric
+#   Geometric distribution with a conjugate beta prior.
+#
+#   The support is {1,2,3,...}.
+#   Hyperparameters:
+#     alpha_0, beta_0
+#   Parameter is the success probability:
+#     p
+
+
+# ===== Not Supported =====
+
+
+# Gaussian
+#   Multivariate Gaussian distribution class.  (Only works for 2 or more
+#   dimensions. For a scalar Gaussian, use a scalar class.  Uses a conjugate
+#   Normal/Inverse-Wishart prior.) Hyperparameters mostly follow Gelman et
+#   al.'s notation in Bayesian Data
+#
+#   Analysis:
+#     nu_0, sigma_0, mu_0, kappa_0
+#   Parameters are mean and covariance matrix:
+#     mu, sigma
+#
+#
+# ScalarGaussianNonconjNIX
+# Non-conjugate separate priors on mean and variance parameters, 
+#   via mu ~ Normal(mu_0,tausq_0)
+#   sigmasq ~ (Scaled-)Inverse-ChiSquared(sigmasq_0,nu_0)
+#
+#
+# ScalarGaussianNonconjNIG
+#   This is like ScalarGaussianNonconjNiIG except prior is in natural
+#     coordinates

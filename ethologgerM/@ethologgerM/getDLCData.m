@@ -38,11 +38,11 @@ end
 
 switch toLoad
     case 1
-        loadData;
         disp('Reading CSV file (no filtering)')
-    case 2
         loadData;
-        disp('Reading CSV file (filtered)')
+    case 2
+         disp('Reading CSV file (filtered)')
+        loadData;
     case 3
         disp(['No data loaded for ' obj.File]);
 end

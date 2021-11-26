@@ -1,0 +1,40 @@
+# Please always use absolute paths in this configuration file.
+project_path: "/cta/users/aosman/ethologger-projects/some-project/"
+
+configuration_paths:
+  feature_cfg: "/cta/users/aosman/ethologger/examples/configuration_examples/feature_cfg.yaml"
+  temporal_cfg: "/cta/users/aosman/ethologger/examples/configuration_examples/temporal_cfg.yaml"
+  pose_cfg: "/cta/users/aosman/ethologger/examples/configuration_examples/pose_cfg.yaml"
+
+experiment_data_paths:
+  # name: path to directory
+  #         Input file format is name-index.csv, other files will be ignored.
+  #         Index is a number, consecutive files will be concatenated.  If
+  #         indeces are not consecutive will raise an error. Indices can start
+  #         from any nonnegative integer, time-stamps will be handled
+  #         accordingly.
+  FlyF1-03082020164520: "/cta/users/aosman/ethologger/expt_data/loess-filtered/FlyF1-03082020164520/"
+  FlyF2-03092020175006: "/cta/users/aosman/ethologger/expt_data/loess-filtered/FlyF2-03092020175006/"
+  FlyF3-08092021173846: "/cta/users/aosman/ethologger/expt_data/loess-filtered/FlyF3-08092021173846/"
+  FlyM4-03062020153616: "/cta/users/aosman/ethologger/expt_data/loess-filtered/FlyM4-03062020153616/"
+  FlyM4-08092021173833: "/cta/users/aosman/ethologger/expt_data/loess-filtered/FlyM4-08092021173833/"
+  FlyM5-03072020150452: "/cta/users/aosman/ethologger/expt_data/loess-filtered/FlyM5-03072020150452/"
+  FlyF5-08102021175053: "/cta/users/aosman/ethologger/expt_data/loess-filtered/FlyF5-08102021175053/"
+  FlyF6-08102021175050: "/cta/users/aosman/ethologger/expt_data/loess-filtered/FlyF6-08102021175050/"
+  FlyF7-08112021174123: "/cta/users/aosman/ethologger/expt_data/loess-filtered/FlyF7-08112021174123/"
+  FlyM8-08112021174107: "/cta/users/aosman/ethologger/expt_data/loess-filtered/FlyM8-08112021174107/"
+  FlyM12-08162021175307: "/cta/users/aosman/ethologger/expt_data/loess-filtered/FlyM12-08162021175307/"
+  FlyM13-08172021175457: "/cta/users/aosman/ethologger/expt_data/loess-filtered/FlyM13-08172021175457/"
+  FlyF14-08172021175459: "/cta/users/aosman/ethologger/expt_data/loess-filtered/FlyF14-08172021175459/"
+  FlyF15-08182021173222: "/cta/users/aosman/ethologger/expt_data/loess-filtered/FlyF15-08182021173222/"
+  FlyM16-08182021173236: "/cta/users/aosman/ethologger/expt_data/loess-filtered/FlyM16-08182021173236/"
+  FlyF17-08192021173437: "/cta/users/aosman/ethologger/expt_data/loess-filtered/FlyF17-08192021173437/"
+  
+
+# Optional.
+annotation_paths:
+  # name: path to file
+  FlyF1-03082020164520: "/cta/users/aosman/ethologger/human_annotations/FlyF1-03082020164520.csv"
+  FlyF2-03092020175006: "/cta/users/aosman/ethologger/human_annotations/FlyF2-03092020175006.csv"
+  FlyM4-03062020153616: "/cta/users/aosman/ethologger/human_annotations/FlyM4-03062020153616.csv"
+  FlyM5-03072020150452: "/cta/users/aosman/ethologger/human_annotations/FlyM5-03072020150452.csv"
