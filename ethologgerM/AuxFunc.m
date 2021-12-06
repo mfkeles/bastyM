@@ -1,7 +1,5 @@
 classdef AuxFunc
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
-    
+    %Auxiliary Functions used in basty pipeline. 
     properties
         
     end
@@ -12,6 +10,9 @@ classdef AuxFunc
         end
         
         function intvl_locs = rem_overlap_intvls(intvl_locs)
+            %removes overlapping intervals when interval indices are
+            %provided (i.e. idx1:idx2)
+            
             while sum(diff(intvl_locs(:,1))<0)
                 idx = find(diff(intvl_locs(:,1))<0,1);
                 intvl_locs(idx,1) = intvl_locs(idx+1,1);
@@ -52,7 +53,8 @@ classdef AuxFunc
        
         
         function synthetic_trace = generate_synthetic_set(numOfPeaks)
-            %generates a synthetic prob pump trace.
+            %generates a synthetic prob pump trace for given number of peaks, similar to the
+            %behavioral data. 
             synth = sinc(-1.8:1/20:1.8);
             synth = synth+abs(min(x));
             synthetic_trace = arrayfun(@(x) repmat(synth,1,x),1:numOfPeaks,'UniformOutput',false);

@@ -1,5 +1,6 @@
 function create_body_map(config_path,target_path,boxsize)
-
+%creates zoomed in images of labeled training set body parts. Used to
+%identify uniformity in the frames.
 %check if target path exists
 if ~isfolder(target_path)
     mkdir(target_path);
