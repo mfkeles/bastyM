@@ -74,7 +74,24 @@ classdef AuxFunc
             end
             
         end 
-   
+
+        function save_labels(ls,obj)
+            save(fullfile(obj.Folder,'ls.mat'),'ls');
+        end
+        
+        function calc_zt_time(idxs)
+            %this function assumes FPS is 30 and ZT10 is the start point
+            
+        end
+        
+        
+        function hour = frame_to_hours(frames,fps)
+            x = seconds(frames/fps);
+            x.Format = 'hh:mm:ss';
+            hour = x;
+            
+        end
+        
         
         function ret = sliding_window(seq,n,s)
             n= fix(n/2);  
