@@ -32,13 +32,16 @@ classdef Plotter < handle_light
         function notBoxBlack(bkgHandles,bkgStats)
             %adjusts the figure to have black background with mainly white
             %features Hardcastle et al., 2021
+            defaultMarkerSize=20;
+            applyFisherZ = false;
             semColor = hex2rgb('#fc9272');
             lineColor = [1 1 1];
-            meanColor = hex2rgb('#af8dc3');
+            patchColor = [0.1098    0.5647    0.6000]; %hex2rgb('#af8dc3');
+            meanColor = [  1.0000    0.9294    0.6275];
             for bIdx = 1:numel(bkgHandles)
                 if ~isempty(bkgHandles(bIdx).data)
-                    bkgHandles(bIdx).semPtch.FaceColor = 'none';
-                    bkgHandles(bIdx).semPtch.EdgeColor = lineColor;
+                    bkgHandles(bIdx).semPtch.FaceColor = patchColor;
+                    bkgHandles(bIdx).semPtch.EdgeColor = 'none';
                     bkgHandles(bIdx).semPtch.FaceAlpha = 1;
                     bkgHandles(bIdx).semPtch.EdgeAlpha = 1;
                     bkgHandles(bIdx).semPtch.Visible = 'on';
@@ -47,23 +50,23 @@ classdef Plotter < handle_light
                     bkgHandles(bIdx).data.Marker = '.';
                     bkgHandles(bIdx).data.Color = lineColor;
                     bkgHandles(bIdx).data.MarkerSize = defaultMarkerSize;
-                    bkgHandles(bIdx).data.Visible = 'on';
+                    bkgHandles(bIdx).data.Visible = 'off';
                     
-                    bkgHandles(bIdx).mu.Color = lineColor;
+                    bkgHandles(bIdx).mu.Color = meanColor;
                     bkgHandles(bIdx).med.Color = lineColor;
                     bkgHandles(bIdx).med.Visible = 'off';
-                    bkgHandles(bIdx).sd.Visible = 'off';
-                    bkgHandles(bIdx).sd.Color = semColor;
+                    bkgHandles(bIdx).sd.Visible = 'on';
+                    bkgHandles(bIdx).sd.Color = meanColor;
                     bkgHandles(bIdx).sd.LineWidth = 2;
                     bkgHandles(bIdx).mu.LineWidth = 3;
                     bkgHandles(bIdx).med.LineWidth = 2;
                     bkgHandles(bIdx).med.LineStyle = ':';
                     
                     % set sd to top layer
-                    bkgHandles(bIdx).mu.ZData  = abs(bkgHandles(bIdx).mu.ZData);
-                    bkgHandles(bIdx).med.ZData  = abs(bkgHandles(bIdx).med.ZData);
-                    
-                    bkgHandles(bIdx).sd.ZData  = abs(bkgHandles(bIdx).sd.ZData);
+%                     bkgHandles(bIdx).mu.ZData  = abs(bkgHandles(bIdx).mu.ZData);
+%                     bkgHandles(bIdx).med.ZData  = abs(bkgHandles(bIdx).med.ZData);
+%                     
+%                     bkgHandles(bIdx).sd.ZData  = abs(bkgHandles(bIdx).sd.ZData);
                     
                     if applyFisherZ
                         zMean = tanh(mean(atanh(bkgStats(bIdx).vals)));
