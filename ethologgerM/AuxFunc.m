@@ -74,6 +74,23 @@ classdef AuxFunc
             end
             
         end 
+        
+        function exportAnnotatedData(lsPath)
+            %exports annotated traces from ls file
+            ls = load(lsPath);
+            [filepath,name,~] = fileparts(lsPath);
+            tmpPath = fullfile(filepath,[name '_exported']);
+            
+            if ~isfolder(tmpPath)
+                mkdir(tmpPath)
+            end
+            varNames = ls.ls.Labels.Properties.VariableNames;
+            for i=1:numel(varNames)
+                tmpArr = ls.ls.Labels.(varNames{i}){1}.ROILimits;
+                writematrix(tmpArr,fullfile(tmpPath,[name '_' varNames{i} '.csv']));
+            end    
+        end
+            
 
         function save_labels(ls,obj)
             save(fullfile(obj.Folder,'ls.mat'),'ls');
