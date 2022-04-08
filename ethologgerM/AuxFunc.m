@@ -91,7 +91,15 @@ classdef AuxFunc
             end    
         end
             
+        function importSnapFeatures(snapPath)
 
+            snapTable  = readtable(snapPath);
+            snapArr = table2array(snapTable);
+            snapArr(:,1) = [];
+            snapArr(1,:) = [];
+
+        end
+        
         function save_labels(ls,obj)
             save(fullfile(obj.Folder,'ls.mat'),'ls');
         end
