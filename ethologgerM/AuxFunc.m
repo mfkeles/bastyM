@@ -86,12 +86,14 @@ classdef AuxFunc
             end
             varNames = ls.ls.Labels.Properties.VariableNames;
             for i=1:numel(varNames)
-                tmpArr = ls.ls.Labels.(varNames{i}){1}.ROILimits;
-                writematrix(tmpArr,fullfile(tmpPath,[name '_' varNames{i} '.csv']));
-            end    
+                if ~isempty(ls.ls.Labels.(varNames{i}){:})
+                    tmpArr = ls.ls.Labels.(varNames{i}){1}.ROILimits;
+                    writematrix(tmpArr,fullfile(tmpPath,[name '_' varNames{i} '.csv']));
+                end
+            end
         end
             
-        function importSnapFeatures(snapPath)
+        function snapArr = importSnapFeatures(snapPath)
 
             snapTable  = readtable(snapPath);
             snapArr = table2array(snapTable);
