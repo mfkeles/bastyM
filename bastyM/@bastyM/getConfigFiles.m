@@ -4,7 +4,7 @@ if nargin < 2
     if ismac
     pathIN = '/Users/mehmetkeles/Desktop/git_projects/ethologger/examples/configuration_examples';
     else
-    pathIN = 'C:\Users\Mehmet Keles\Desktop\git_dir\DLC-FlySleep\ethologgerM\configuration_examples';
+    pathIN = 'C:\Users\Mehmet Keles\Desktop\git_dir\DLC-FlySleep\bastyM\configuration_examples';
     end
 else
     pathIN = varargin{1};
