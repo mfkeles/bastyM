@@ -21,6 +21,7 @@ classdef bastyM < handle_light
     
     properties (Transient)
         Data
+        OrientedData
         Sensor
         Frames
     end
@@ -31,6 +32,8 @@ classdef bastyM < handle_light
         median_filter_size
         pose_cfg %TODO: SINGLE CFG STRUCT, AUTO CONFIG LOAD
         feature_cfg
+        hampelWindow = 10
+        rloessWindow = 10
     end
     
     
@@ -88,6 +91,7 @@ classdef bastyM < handle_light
         getDLCData(obj)
         getDateTime(obj)
         [dfPose, dfLlh] = getOrientedPose(obj,threshold)
+        runFilter(obj)
         
     end
     
@@ -95,8 +99,7 @@ classdef bastyM < handle_light
         [dfTemp] = median_filter(dfPose,order)
         [cfg] = read_config(pathIN)
         [dfTemp,pfilt] = adaptive_llh_filter(dfPose,dfLlh,llh_adaptive_filter);
-        [dfTemp] = filterIt(dfPose,order)
-        
+
     end
     
     

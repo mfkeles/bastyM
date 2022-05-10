@@ -180,8 +180,6 @@ end
 
 dfPose = pose_table;
 dfLlh = llh_table; 
-
-
 end
 
 
