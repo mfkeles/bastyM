@@ -135,6 +135,7 @@ dfLlhOriented = llh_table;
 dfPoseFinal = [dfPose dfPoseOriented];
 dfLlhFinal = [dfLlh dfLlhOriented];
 
+obj.OrientedData = dfPoseFinal;
 end
 
 function [dfPose, dfLlh] = get_pose(obj)

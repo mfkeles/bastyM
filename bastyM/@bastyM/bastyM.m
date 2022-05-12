@@ -15,8 +15,6 @@ classdef bastyM < handle_light
         Created;
         Modified;
         ChooseFiltered =0;
-        dfPose
-        dfLlh
     end
     
     properties (Transient)
@@ -91,7 +89,7 @@ classdef bastyM < handle_light
         getDLCData(obj)
         getDateTime(obj)
         [dfPose, dfLlh] = getOrientedPose(obj,threshold)
-        runFilter(obj)
+        [dfPose] = runFilter(obj)
         
     end
     
