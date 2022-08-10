@@ -26,8 +26,8 @@ classdef FrameExtraction < handle_light
         end
         
         function val_moving = get_movement_values(obj,tVal,datums)
-            %METHOD1 Summary of this method goes here
-            %   Detailed explanation goes here
+            %GET_MOVEMENT_VALUES Extract values from table (tVal) using the column list (datums) and
+            %sum for each row.
             
             tActivity = tVal;
             val_moving = obj.get_frame_values(tActivity,datums);
@@ -43,7 +43,7 @@ classdef FrameExtraction < handle_light
             tol_percent = obj.fps*tol_percent;
             return_unresolved = 0;
             
-            label_win =  Aux.sliding_window(obj.threshold_indicator_labels,winsize,s); %FINISH THIS FUNCTION
+            label_win =  AuxFunc.sliding_window(obj.threshold_indicator_labels,winsize,s); %FINISH THIS FUNCTION
             
             intermediate_labels = zeros(numel(obj.threshold_indicator_labels),1);
             
@@ -74,7 +74,7 @@ classdef FrameExtraction < handle_light
                 intermediate_labels(intermediate_labels==-1) = 0;
             end
             
-            intvls = Aux.cont_intvls(intermediate_labels);
+            intvls = AuxFunc.cont_intvls(intermediate_labels);
             
             obj.labels = zeros(size(intermediate_labels,1),1);
             
@@ -97,6 +97,9 @@ classdef FrameExtraction < handle_light
         
         
         function threshold = get_threshold(obj,frame_val,threshold_args)
+            %GET_THRESHOLD Gets a threshold for moving vs dormant bouts
+            
+            %2 components is good to determine moving vs not. 
             num_gmm_comp = threshold_args("n_components");
             threshold_idx = threshold_args("threshold_idx");
             
@@ -124,10 +127,10 @@ classdef FrameExtraction < handle_light
             expt_item.mask = dormant_moving_labels==0;
             dormant_intervals = [];
             
-            intervals = unique(Aux.cont_intvls(dormant_moving_labels));
+            intervals = unique(AuxFunc.cont_intvls(dormant_moving_labels));
             
             for i=2:numel(intervals)
-                if dormant_moving_labels(intervals(i-1)) == 0;
+                if dormant_moving_labels(intervals(i-1)) == 0
                     dormant_intervals(end+1,:) = [intervals(i-1) intervals(i)];
                 end
             end 
@@ -136,19 +139,21 @@ classdef FrameExtraction < handle_light
         
         
         function frame_val = get_frame_values(tVal,datums)
+            %GET_FRAME_VALUES Sum values for each row for given columns
+            %(datums) in table (tVal).
+            
             if iscell(datums)
                 datums = cellflat(cellfun(@(x) cellstr(x),datums,'UniformOutput',false));
             end
             frame_val = sum(tVal{:,datums},2);
-            % datum is string char
         end
         
         function [cluster_boundaries, sorted_means]= threshold_detection(frame_val,num_gmm_comp)
             log_ = false;
             if log_
-                X=log2(frame_val+1);
+                X = log2(frame_val+1);
             else
-                X=frame_val;
+                X = frame_val;
             end
             GMModel = fitgmdist(X,num_gmm_comp);
             clusters = cluster(GMModel,X);
@@ -164,7 +169,7 @@ classdef FrameExtraction < handle_light
         end
         
         function bout_dict = get_bouts(labels)
-            intvls = Aux.cont_intvls(labels);
+            intvls = AuxFunc.cont_intvls(labels);
             
             for i = 2:numel(intvls)
                 indicator = labels(intvls(i-1));

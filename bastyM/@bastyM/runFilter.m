@@ -1,10 +1,13 @@
 function dfPose = runFilter(obj,hampelWindow,rloessWindow)
-
-dfPose = obj.OrientedData;
+try
+    dfPose = obj.OrientedData;
+catch
+    disp("Orientation Data is empty")
+end
 
 if nargin < 3
-        hampelWindow = obj.hampelWindow;
-        rloessWindow = obj.rloessWindow;
+    hampelWindow = obj.hampelWindow;
+    rloessWindow = obj.rloessWindow;
 else
     obj.hampelWindow = hampelWindow;
     obj.rloessWindow = rloessWindow;

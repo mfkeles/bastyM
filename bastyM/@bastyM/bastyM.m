@@ -76,7 +76,7 @@ classdef bastyM < handle_light
             try
                 getConfigFiles(obj);
             catch
-                disp("config file couldn/'t found")
+                disp("config file couldn't found")
             end
             %             if ~isempty(obj.File)
             %                 getDateTime(obj);
@@ -88,8 +88,9 @@ classdef bastyM < handle_light
     methods (Access=public)
         getDLCData(obj)
         getDateTime(obj)
+        getAviPath(obj)
         [dfPose, dfLlh] = getOrientedPose(obj,threshold)
-        [dfPose] = runFilter(obj)
+        [dfPose] = runFilter(obj,hampelWindow,rloessWindow)
         
     end
     
