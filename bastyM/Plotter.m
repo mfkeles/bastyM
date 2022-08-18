@@ -29,7 +29,28 @@ classdef Plotter < handle_light
             set(gcf,'color','k')
         end
         
-        function notBoxBlack(bkgHandles,bkgStats)
+        function modGcaBlack(gca,fontsize)
+            set(gca,'XColor','w','YColor','w', ...
+                'ZColor','w', ...
+                'FontName','Verdana', ...
+                'Color','k', ...
+                'FontSize',fontsize, ...
+                'TickDir','out')
+        end
+
+        function modXTicktoMinutes(gca,fps)
+            numel(gca().XTick);
+        end
+
+        function removeTicks(gca)
+            set(gca,'XTick',[]);
+            set(gca,'YTick',[]);
+        end
+            
+
+
+
+        function notBoxBlack(bkgHandyles,bkgStats)
             %adjusts the figure to have black background with mainly white
             %features Hardcastle et al., 2021
             defaultMarkerSize=20;

@@ -3,60 +3,177 @@
 
 
 %each folder contains single experiments with associated .csv and .avi
-folderPath = 'Z:\mfk\DeepLabCut_Videos\MK_Non_WT';
+%folderPath = 'Z:\mfk\DeepLabCut_Videos\MK_Non_WT';
+
+folderPath = 'Y:\MK_Migrated\MK_SET4';
 
 %go through each folder to find .avi
 folderList = dir(fullfile(folderPath,'20*'));
 
 obj =[];
 for i = 1:numel(folderList)
-    filePath = dir(fullfile(folderList(i).folder,folderList(i).name,'*.csv'));
+    filePath = dir(fullfile(folderList(i).folder,folderList(i).name,'*200000.csv'));
     if size(filePath,1) == 1
+        %check if tSnap exists
+        if ~isfile(fullfile(filePath.folder, 'tSnap.mat'))
 
-        obj{i} = bastyM(fullfile(filePath.folder,filePath.name));
+            obj{i} = bastyM(fullfile(filePath.folder,filePath.name));
 
-        obj{i}.getOrientedPose;
+            obj{i}.getOrientedPose;
 
-        dfPose = obj{i}.runFilter(10,23); %filter the traces
+            dfPose = obj{i}.runFilter(10,23); %filter the traces
 
-        dfPose = AuxFunc.clean_column_names(dfPose);
+            dfPose = AuxFunc.clean_column_names(dfPose);
 
-        spats = Spatiotemporal(obj{i}.feature_cfg,30); %30 is the FPS here
+            spats = Spatiotemporal(obj{i}.feature_cfg,30); %30 is the FPS here
 
-        [tSnap,sNames ] = spats.extract_snap_features(dfPose);
+            [tSnap,sNames ] = spats.extract_snap_features(dfPose);
 
-        [tDelta,dNames] = spats.extract_delta_features(dfPose);
+            [tDelta,dNames] = spats.extract_delta_features(dfPose);
 
-        position = AuxFunc.calculate_dormant_position(tSnap,'distance_origin_thor_post',30);
+            %from that.
 
-        %save tsnap features
-        AuxFunc.save_snap_fts(tSnap,obj,0);
+            position = AuxFunc.calculate_dormant_position(tSnap,'distance_origin_thor_post',5);
 
-        %save position features
-        
-
-        config = 'C:\Users\Mehmet Keles\Desktop\git_dir\DLC-FlySleep\bastyM\config.mat'; %load CFG with structures
+            position = AuxFunc.calculate_median_bout(tSnap,position,'thor_post');
 
 
+            %save tsnap features
+            AuxFunc.save_snap_fts(tSnap,sNames,obj{i},0);
 
-        load(config)
-        
-        frameExt = FrameExtraction(CFG.DORMANT_INTERVALS_ARGS('min_rest'),CFG.REST_INTERVALS_ARGS('tol_duration'),CFG.REST_INTERVALS_ARGS('tol_percent'),CFG.REST_INTERVALS_ARGS('winsize'));
+            %save position features
+            AuxFunc.save_position(position,obj{i})
 
+            %display the finished
+            disp([obj{i}.File ' finished'])
+        else
+            load(fullfile(filePath.folder,'tSnap.mat'));
 
+            clear position
 
-        val_moving = frameExt.get_movement_values(tDelta,tDelta.Properties.VariableNames);
+            position = AuxFunc.calculate_dormant_position(tSnap,'distance_origin_thor_post',5);
 
+            position = AuxFunc.calculate_median_bout(tSnap,position,'thor_post');
+
+            save(fullfile(filePath.folder,'position.mat'),'position')
+
+        end
+
+        %check if tSnap exists, if it does, then calculate dormant position
+
+        %         config = 'C:\Users\Mehmet Keles\Desktop\git_dir\DLC-FlySleep\bastyM\config.mat'; %load CFG with structures
+        %
+        %         load(config)
+        %
+        %         frameExt = FrameExtraction(CFG.DORMANT_INTERVALS_ARGS('min_rest'),CFG.REST_INTERVALS_ARGS('tol_duration'),CFG.REST_INTERVALS_ARGS('tol_percent'),CFG.REST_INTERVALS_ARGS('winsize'));
+        %
+        %
+        %
+        %         val_moving = frameExt.get_movement_values(tDelta,tDelta.Properties.VariableNames);
+        %
 
     else
+
         continue
     end
 end
 
+clear pos
+n=1;
+for i = 1:numel(folderList)
+    filePath = dir(fullfile(folderList(i).folder,folderList(i).name,'*.csv'));
+    if size(filePath,1) == 1
+        %check if tSnap exists
+        if isfile(fullfile(filePath.folder, 'tSnap.mat'))
+
+            load(fullfile(filePath.folder,'position.mat'));
+
+            pos{n} = position;
+
+            clear position
+            n=n+1;
+        end
+
+        %check if tSnap exists, if it does, then calculate dormant position
+
+        %         config = 'C:\Users\Mehmet Keles\Desktop\git_dir\DLC-FlySleep\bastyM\config.mat'; %load CFG with structures
+        %
+        %         load(config)
+        %
+        %         frameExt = FrameExtraction(CFG.DORMANT_INTERVALS_ARGS('min_rest'),CFG.REST_INTERVALS_ARGS('tol_duration'),CFG.REST_INTERVALS_ARGS('tol_percent'),CFG.REST_INTERVALS_ARGS('winsize'));
+        %
+        %
+        %
+        %         val_moving = frameExt.get_movement_values(tDelta,tDelta.Properties.VariableNames);
+        %
+
+    else
+
+        continue
+    end
+end
+
+blue = [0,68,136]/255;
+red =  [187,85,102]/255;
+yellow = [221,170,51]/255;
+col = [blue;yellow;red];
+
+clf
+for i=1:numel(pos)
+    h = subplot(211);
+    f1{i} = cdfplot(pos{i}.rest_bouts);
+    f1{i}.LineWidth = 0.5;
+    f1{i}.Color = [1 1 1];
+    hold all
 
 
-[labeledRegions, numberOfRegions] = bwlabel(bwareafilt((clusters==1),[1,inf]));
+    pos{i}.color = zeros(numel(pos{i}.rest_bouts),1);
+    pos{i}.color(pos{i}.rest_bouts<30*60) = 1;
+    pos{i}.color(pos{i}.rest_bouts>=30*60) = 2;
+    pos{i}.color(pos{i}.rest_bouts>=30*60*5) = 3;
 
-scatter(1:numel(val_moving),val_moving,10,clusters,'filled');
+    for j=1:3
+        subplot(2,3,j+3)
+        scatter(pos{i}.med_data.x_pos(pos{i}.color==j),pos{i}.med_data.y_pos(pos{i}.color==j),5,col(j,:),'filled','MarkerFaceAlpha',0.7)
+        hold all
+        axis equal
+        box off
+        xlim([0 1100])
+        ylim([0 800])
 
-%try removing when the values equal to 1
+    end
+
+
+
+end
+
+subplot(211)
+Plotter.modGcaBlack(gca,10)
+set(gca,'XTick',[0:10*30*60:max(gca().XTick)])
+set(gca,'XTickLabel',[0:10:100])
+xlabel('Time (min)')
+%xlim([0 20*60*40])
+[t,s] = title('\color{white}Cumulative Distribution Function for {\itper^{01}} n=12');
+
+for m=1:3
+    subplot(2,3,m+3)
+    box on
+    Plotter.modGcaBlack(gca,10)
+    set(gca,'ydir','reverse')
+    Plotter.removeTicks(gca)
+end
+
+subplot(2,3,4)
+[t,s] = title('\color{white}< 1 min');
+t.FontSize = 8;
+subplot(2,3,5)
+[t,s] = title('\color{white}1 min < bout < 5 min');
+t.FontSize = 8;
+subplot(2,3,6)
+[t,s] = title('\color{white}> 5 min')
+t.FontSize = 8;
+
+folderPath = 'Z:\mfk\DeepLabCut_Videos\MK_Non_WT';
+exportgraphics(gcf,fullfile(folderPath,'cdf_pos_analysis.pdf'),'Resolution',300,'ContentType','vector','BackgroundColor','k');
+s
+

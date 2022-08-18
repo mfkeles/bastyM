@@ -78,6 +78,11 @@ classdef AuxFunc
 
         end
 
+        function save_position(position,obj)
+            save(fullfile(obj.Folder,'position.mat'),'position');
+        end
+
+
         function exportAnnotatedData(lsPath)
             %exports annotated traces from ls file
             ls = load(lsPath);
@@ -148,9 +153,16 @@ classdef AuxFunc
 
             %cluster the data
             clusters = cluster(GMModel,meanVel);
+            
+            %remove movements that are smaller 1/6th of a seconds
+            amask = bwareafilt((clusters~=idx),[1,5]);
+            clusters(amask) = idx;
 
             %filter out bouts less than 1 second
             mask = bwareafilt((clusters==idx),[30,inf]);
+
+
+
 
             [labeledRegions, ~] = bwlabel(mask);
 
@@ -166,6 +178,8 @@ classdef AuxFunc
         end
 
         function position = calculate_median_bout(tSnap,position,body_part_name)
+            %calculate median bout determines the median position of the
+            %fly during a quiescent bout
 
             body_part_x = ['pose_',body_part_name, '_x'];
             body_part_y = ['pose_',body_part_name, '_y'];
@@ -182,8 +196,14 @@ classdef AuxFunc
             x_med = cellfun(@(x) median(x),x_bouts);
             y_med = cellfun(@(x) median(x),y_bouts);
 
-            position.med_data = [x_med',y_med'];
+            position.med_data = array2table([x_med',y_med',position.rest_bouts],'VariableNames',{'x_pos','y_pos','rest_dur'});
+
+            %get the zt for the quiescent bout
+            bout_time = arrayfun(@(x) round(median(find(position.labeledRegions==x))),1:max(position.labeledRegions));
+            position.bout_time = bout_time;
         end
+
+
 
         function ret = sliding_window(seq,n,s)
             n= fix(n/2);
