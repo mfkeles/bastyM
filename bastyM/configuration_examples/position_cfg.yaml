@@ -1,0 +1,8 @@
+#Config parameters for PositionExtraction class
+
+dormant_snap_feat:
+    - distance_origin_thor_post
+
+bout_body_parts:
+    - thor_post
+    - atip

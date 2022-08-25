@@ -1,34 +1,65 @@
 classdef Plotter < handle_light
     %A class for modifying plotting functions
-    
+
     properties
         Property1
     end
-    
+
     methods
         function obj = untitled6(inputArg1,inputArg2)
             %UNTITLED6 Construct an instance of this class
             %   Detailed explanation goes here
             obj.Property1 = inputArg1 + inputArg2;
         end
-        
+
         function outputArg = method1(obj,inputArg)
             %METHOD1 Summary of this method goes here
             %   Detailed explanation goes here
             outputArg = obj.Property1 + inputArg;
         end
     end
-    
+
     methods (Static)
-        function initiatePlot()
-            clf
-            axes('NextPlot','add','FontSize',16,'TickDir','out','FontName','Verdana','Color','k',...
-                'XColor','w',...
-                'YColor','w',...
-                'ZColor','w')
-            set(gcf,'color','k')
+        function col = tricolors()
+            blue = [0,68,136]/255;
+            red =  [187,85,102]/255;
+            yellow = [221,170,51]/255;
+            col = [blue;yellow;red];
         end
-        
+
+        function modSubPlot(h,fontsize,color)
+            if color == 'k'
+            set(h,'FontSize',fontsize,'TickDir','out','FontName','Verdana','Color','k',...
+                    'XColor','w',...
+                    'YColor','w',...
+                    'ZColor','w');
+            else
+             set(h,'FontSize',fontsize,'TickDir','out','FontName','Verdana','Color','w',...
+                    'XColor','k',...
+                    'YColor','k',...
+                    'ZColor','k')
+            end
+        end
+
+
+
+        function initiatePlot(fontsize,color)
+
+            if color == 'k'
+                axes('NextPlot','add','FontSize',fontsize,'TickDir','out','FontName','Verdana','Color','k',...
+                    'XColor','w',...
+                    'YColor','w',...
+                    'ZColor','w')
+                set(gcf,'color','k')
+            else
+                axes('NextPlot','add','FontSize',fontsize,'TickDir','out','FontName','Verdana','Color','w',...
+                    'XColor','k',...
+                    'YColor','k',...
+                    'ZColor','k')
+                set(gcf,'color','w')
+            end
+        end
+
         function modGcaBlack(gca,fontsize)
             set(gca,'XColor','w','YColor','w', ...
                 'ZColor','w', ...
@@ -46,7 +77,13 @@ classdef Plotter < handle_light
             set(gca,'XTick',[]);
             set(gca,'YTick',[]);
         end
-            
+
+        function removeTickLabels(gca)
+            set(gca,'XTickLabel',[]);
+            set(gca,'YTickLabel',[]);
+        end
+
+
 
 
 
@@ -67,12 +104,12 @@ classdef Plotter < handle_light
                     bkgHandles(bIdx).semPtch.EdgeAlpha = 1;
                     bkgHandles(bIdx).semPtch.Visible = 'on';
                     bkgHandles(bIdx).semPtch.LineWidth = 2;
-                    
+
                     bkgHandles(bIdx).data.Marker = '.';
                     bkgHandles(bIdx).data.Color = lineColor;
                     bkgHandles(bIdx).data.MarkerSize = defaultMarkerSize;
                     bkgHandles(bIdx).data.Visible = 'off';
-                    
+
                     bkgHandles(bIdx).mu.Color = meanColor;
                     bkgHandles(bIdx).med.Color = lineColor;
                     bkgHandles(bIdx).med.Visible = 'off';
@@ -82,13 +119,13 @@ classdef Plotter < handle_light
                     bkgHandles(bIdx).mu.LineWidth = 3;
                     bkgHandles(bIdx).med.LineWidth = 2;
                     bkgHandles(bIdx).med.LineStyle = ':';
-                    
+
                     % set sd to top layer
-%                     bkgHandles(bIdx).mu.ZData  = abs(bkgHandles(bIdx).mu.ZData);
-%                     bkgHandles(bIdx).med.ZData  = abs(bkgHandles(bIdx).med.ZData);
-%                     
-%                     bkgHandles(bIdx).sd.ZData  = abs(bkgHandles(bIdx).sd.ZData);
-                    
+                    %                     bkgHandles(bIdx).mu.ZData  = abs(bkgHandles(bIdx).mu.ZData);
+                    %                     bkgHandles(bIdx).med.ZData  = abs(bkgHandles(bIdx).med.ZData);
+                    %
+                    %                     bkgHandles(bIdx).sd.ZData  = abs(bkgHandles(bIdx).sd.ZData);
+
                     if applyFisherZ
                         zMean = tanh(mean(atanh(bkgStats(bIdx).vals)));
                         bkgHandles(bIdx).mu.YData = [zMean zMean];

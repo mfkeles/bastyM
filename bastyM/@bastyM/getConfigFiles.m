@@ -18,6 +18,8 @@ end
 
 pose = fullfile(pathIN,'pose_cfg.yaml');
 feature = fullfile(pathIN,'feature_cfg.yaml');
+position = fullfile(pathIN,'position_cfg.yaml');
 
 obj.pose_cfg = ReadYaml(pose);
 obj.feature_cfg = ReadYaml(feature);
+obj.position_cfg = ReadYaml(position);

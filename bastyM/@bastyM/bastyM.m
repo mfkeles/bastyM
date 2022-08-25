@@ -30,6 +30,7 @@ classdef bastyM < handle_light
         median_filter_size
         pose_cfg %TODO: SINGLE CFG STRUCT, AUTO CONFIG LOAD
         feature_cfg
+        position_cfg;
         hampelWindow = 10
         rloessWindow = 10
     end
