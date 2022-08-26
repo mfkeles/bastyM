@@ -14,10 +14,13 @@ classdef PositionExtraction < handle_light
         fps;
         position_cfg;
         tSnap;
+        sNames;
+        median_bouts;
+        distance_feat;
     end
 
     methods
-        function obj = PositionExtraction(position_cfg,bin,tSnap,fps)
+        function obj = PositionExtraction(position_cfg,bin,tSnap,fps,sNames)
             %POSITIONEXTRACTiON subclass object constructor
 
             obj.position_cfg = position_cfg;
@@ -26,6 +29,7 @@ classdef PositionExtraction < handle_light
             obj.tSnap = tSnap;
             obj.fps = fps;
             obj.bout_body_parts = position_cfg.bout_body_parts;
+            obj.sNames = sNames;
         end
 
         function outputArg = method1(obj,inputArg)
@@ -91,17 +95,38 @@ classdef PositionExtraction < handle_light
             med_data.bout_time = bout_time';
             med_data.x_bouts = x_bouts';
             med_data.y_bouts = y_bouts';
+
+            obj.median_bouts.(body_part_name) = med_data;
         end
 
-        function [dist_data] = extract_bout_distance_feat(obj,distance_feat)
+        function [tBout] = tSnap2tBout(obj)
+            %tSnapt2tBout extract bout traces from the tSnap
+
+        end
+
+
+        function [dist_data] = extract_bout_distance_feat(obj,dist_feat)
             %extract_bout_distance_feat extract the desired distance_feat
             %for bouts determined by dormant_snap_feat
 
-            dist_feat = ['distance_',distance_feat];
+            %!!!TODO: Check if feature exists
 
-            d_bouts = arrayfun(@(x) obj.tSnap.(dist_feat)(obj.labeledRegions==x),1:max(obj.labeledRegions),'UniformOutput',false);
+            if isempty(obj.distance_feat)
+                dist_feat = ['distance_',dist_feat];
 
-            dist_data = array2table(d_bouts,'VariableNames',dist_feat);
+                d_bouts = arrayfun(@(x) obj.tSnap.(dist_feat)(obj.labeledRegions==x),1:max(obj.labeledRegions),'UniformOutput',false);
+
+                dist_data = array2table(d_bouts','VariableNames',{dist_feat});
+
+                obj.distance_feat = dist_data;
+            else
+                dist_feat = ['distance_',dist_feat];
+
+                d_bouts = arrayfun(@(x) obj.tSnap.(dist_feat)(obj.labeledRegions==x),1:max(obj.labeledRegions),'UniformOutput',false);
+
+                obj.distance_feat.(dist_feat) = d_bouts';
+
+            end
 
         end
 
@@ -118,7 +143,7 @@ classdef PositionExtraction < handle_light
 
     methods (Static)
 
-        function plotPositionVaryDur(med_data,color,fontsize,fps)
+        function plotPositionVaryDur(med_data,color,fontsize)
             x_col = find(cellfun(@(x) contains(x,'_x'),med_data.Properties.VariableNames));
             y_col = find(cellfun(@(x) contains(x,'_y'),med_data.Properties.VariableNames));
 
@@ -129,9 +154,9 @@ classdef PositionExtraction < handle_light
             boutFilter(med_data.rest_dur>=30*60) = 2;
             boutFilter(med_data.rest_dur>=30*60*5) = 3;
 
-             titles{1} = '\color{black}< 1 min';
-             titles{2} = '\color{black}1 min < bout < 5 min';
-             titles{3} = '\color{black}> 5 min';
+            titles{1} = '\color{black}< 1 min';
+            titles{2} = '\color{black}1 min < bout < 5 min';
+            titles{3} = '\color{black}> 5 min';
 
             clf
             for i=1:3
