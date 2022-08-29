@@ -3,49 +3,55 @@
 
 
 %each folder contains single experiments with associated .csv and .avi
-folderPath = 'Z:\mfk\DeepLabCut_Videos\MK_Non_WT';
+folderPath = 'Z:\mb\DLC_Videos\Path_setup\SV';
 
 %folderPath = 'Y:\MK_Migrated\MK_SET4';
 
 %go through each folder to find .avi
-folderList = dir(fullfile(folderPath,'20*'));
+folderList = dir(fullfile(folderPath,'SV*'));
 
-obj =[];
+position_bin = 0;
+
 for i = 1:numel(folderList)
     filePath = dir(fullfile(folderList(i).folder,folderList(i).name,'*200000.csv'));
     if size(filePath,1) == 1
         %check if tSnap exists
         if ~isfile(fullfile(filePath.folder, 'tSnap.mat'))
 
-            obj{i} = bastyM(fullfile(filePath.folder,filePath.name));
+            obj = bastyM(fullfile(filePath.folder,filePath.name));
 
-            obj{i}.getOrientedPose;
+            obj.getOrientedPose;
 
-            dfPose = obj{i}.runFilter(10,23); %filter the traces
+            dfPose = obj.runFilter(10,23); %filter the traces
 
             dfPose = AuxFunc.clean_column_names(dfPose);
 
-            spats = Spatiotemporal(obj{i}.feature_cfg,30); %30 is the FPS here
+            spats = Spatiotemporal(obj.feature_cfg,30); %30 is the FPS here
 
             [tSnap,sNames ] = spats.extract_snap_features(dfPose);
 
             [tDelta,dNames] = spats.extract_delta_features(dfPose);
 
             %from that.
+            if position_bin
 
-            position = AuxFunc.calculate_dormant_position(tSnap,'distance_origin_thor_post',5);
+                position = AuxFunc.calculate_dormant_position(tSnap,'distance_origin_thor_post',5);
 
-            position = AuxFunc.calculate_median_bout(tSnap,position,'thor_post');
+                position = AuxFunc.calculate_median_bout(tSnap,position,'thor_post');
+
+                AuxFunc.save_position(position,obj)
+            end
 
 
             %save tsnap features
-            AuxFunc.save_snap_fts(tSnap,sNames,obj{i},0);
+            AuxFunc.save_snap_fts(tSnap,sNames,obj,0);
 
-            %save position features
-            AuxFunc.save_position(position,obj{i})
+            feat_name = 'distance.origin-prob';
+
+            AuxFunc.saveSpecifiedFeat(feat_name,tSnap,sNames,obj)
 
             %display the finished
-            disp([obj{i}.File ' finished'])
+            disp([obj.File ' finished'])
         else
             load(fullfile(filePath.folder,'tSnap.mat'));
 
@@ -71,7 +77,7 @@ for i = 1:numel(folderList)
         %
         %         val_moving = frameExt.get_movement_values(tDelta,tDelta.Properties.VariableNames);
         %
-dun
+
     else
 
         continue
@@ -210,7 +216,7 @@ for i=1:numel(pos)
 end
 Plotter.modGcaBlack(gca,10)
 h = gca;
-h.XTick = [0:30*60*60*2:1728000] 
+h.XTick = [0:30*60*60*2:1728000]
 h.XTickLabel = {'ZT10','ZT12','ZT14','ZT16','ZT18','ZT20','ZT22','ZT0','ZT2','ZT4'};
 h.YTickLabel = round(h.YTick/(30*60));
 ylabel('Bout Time (min)');

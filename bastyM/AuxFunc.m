@@ -139,7 +139,6 @@ classdef AuxFunc
         end
 
 
-
         function ret = sliding_window(seq,n,s)
             n= fix(n/2);
             for i=1:s:n
@@ -159,6 +158,23 @@ classdef AuxFunc
             end
             ret = [p1 p2];
         end
+
+
+        function saveSpecifiedFeat(feat_name,tSnap,sNames,obj)
+            idx = cellfun(@(x) strcmp(x,feat_name),sNames);
+
+            subFeat = tSnap{:,idx};
+
+            try
+                feat_name = strrep(feat_name,'.','_');
+            catch
+
+            end
+
+            save(fullfile(obj.Folder,strcat(feat_name,'.mat')),'subFeat');
+
+        end
+
     end
 end
 

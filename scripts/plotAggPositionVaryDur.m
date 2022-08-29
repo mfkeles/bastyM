@@ -2,11 +2,39 @@
 
 
 
-folderPath = 'Z:\mfk\DeepLabCut_Videos\MK_Non_WT';
+folderPath = 'Y:\MK_Migrated\MK_SET4';
 
 agg = aggregatePosData(folderPath);
 
 plotAggPosData(agg,folderPath)
+
+
+
+plotThorPosBouts(agg)
+
+
+idx = agg{5}.med_data.thor_post.rest_dur > 30*30 & agg{5}.med_data.thor_post.rest_dur < 30*60*5;
+
+
+
+
+
+
+
+agg{1}.med_data.thor_post.rest_dur
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 function agg = aggregatePosData(folderPath,position_cfg)
@@ -107,5 +135,7 @@ end
 
 
 exportgraphics(gcf,fullfile(folderPath,'aggPosBoutDur.pdf'),'Resolution',300,'ContentType','vector')
+save(fullfile(folderPath,'aggPosBoutDur.mat'),'agg');
+
 
 end
