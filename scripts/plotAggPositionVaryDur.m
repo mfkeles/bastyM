@@ -16,24 +16,7 @@ plotThorPosBouts(agg)
 idx = agg{5}.med_data.thor_post.rest_dur > 30*30 & agg{5}.med_data.thor_post.rest_dur < 30*60*5;
 
 
-
-
-
-
-
 agg{1}.med_data.thor_post.rest_dur
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
