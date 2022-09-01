@@ -159,6 +159,21 @@ classdef AuxFunc
             ret = [p1 p2];
         end
 
+        function [obj,dfPose] = simpleLoad(filePath)
+            %simpleLoad creates a bastyM object and calculates the pose
+            %returning obj and dfPose
+
+            obj = bastyM(fullfile(filePath.folder,filePath.name));
+
+            obj.getOrientedPose;
+
+            dfPose = obj.runFilter(10,23);
+
+             dfPose = AuxFunc.clean_column_names(dfPose);
+
+
+
+        end
 
         function saveSpecifiedFeat(feat_name,tSnap,sNames,obj)
             idx = cellfun(@(x) strcmp(x,feat_name),sNames);

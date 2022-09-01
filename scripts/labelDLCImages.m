@@ -56,10 +56,11 @@ end
 
 
 cbar = 0;
+%create the colorbar
 if cbar
     colormap(jet(size(subTX,2)))
     ch = colorbar;
-    ch.Ticks = [0.5:34.5];
+    ch.Ticks = 0.5:34.5;
      varNames = subTX.Properties.VariableNames;
      modNames = cellfun(@(x) erase(x,'_x'),varNames,'UniformOutput',false);
     ch.TickLabels = modNames; 
