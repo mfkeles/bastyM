@@ -2,7 +2,6 @@
 
 folderPath = 'Z:\mfk\backup_maDLC\BackUp_8_30_22\LiquidFoodDLC-Mehmet-2020-03-23\labeled-data\20210816_Fly12_M_B_6d_8am-08162021175307';
 
-
 labelFile = dir(fullfile(folderPath,'Collected*.csv'));
 
 opts = detectImportOptions(fullfile(labelFile.folder,labelFile.name));
@@ -54,4 +53,22 @@ drawnow;
 
 exportgraphics(gcf,fullfile(labelFile.folder,strcat(name,'_labeled.pdf')),'Resolution',300);
 end
+
+
+cbar = 0;
+if cbar
+    colormap(jet(size(subTX,2)))
+    ch = colorbar;
+    ch.Ticks = [0.5:34.5];
+     varNames = subTX.Properties.VariableNames;
+     modNames = cellfun(@(x) erase(x,'_x'),varNames,'UniformOutput',false);
+    ch.TickLabels = modNames; 
+    ch.TickLabelInterpreter = 'none';
+    ch.FontName = 'Myriad Pro'
+end
+
+
+
+
+
 
