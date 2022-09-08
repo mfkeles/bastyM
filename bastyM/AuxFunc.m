@@ -175,6 +175,11 @@ classdef AuxFunc
 
         end
 
+        function frames = loadMovie(moviePath,idx)
+
+
+        end
+
         function saveSpecifiedFeat(feat_name,tSnap,sNames,obj)
             idx = cellfun(@(x) strcmp(x,feat_name),sNames);
 
