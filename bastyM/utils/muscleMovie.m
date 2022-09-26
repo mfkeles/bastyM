@@ -1,4 +1,4 @@
-imageFullFileName = 'Substack (4000-6000).tif';
+imageFullFileName = '/Users/mehmetkeles/Documents/lab_meeting_prep_81922/Fly2/Substack (12001-18000).tif';
 
 info = imfinfo(imageFullFileName);
 numberOfPages = length(info);
@@ -8,12 +8,14 @@ for k = 1 : numberOfPages
     allPages(:,:,k) = imread(imageFullFileName, k);
     % Now process thisPage somehow...
 end	
-cropPages = allPages(100:500,25:680,:);
+cropPages = allPages(:,:,1:3800);
 
- t = tiledlayout(6,3);
- p = drawpolygon('LineWidth',5,'Color','cyan');
+ numOfRois = 4;
 
-rois = [p p2 p3 p4];
+ for i=1:numOfRois
+ rois(i) = drawpolygon('LineWidth',5,'Color','cyan');
+ end
+
 
 for i=1:numel(rois)
     tmp_mask = createMask(rois(i));
@@ -22,40 +24,45 @@ for i=1:numel(rois)
 end
 
 clf
- t = tiledlayout(6,3);
-ax = nexttile([4,3]);
+ t = tiledlayout(12,3);
+ax = nexttile([8,3]);
 colormap gray
 h_img = imshow(cropPages(:,:,1));
 axis off
 caxis([0 1000])
 
+blue = [0,68,136]/255;
+red =  [187,85,102]/255;
+yellow = [221,170,51]/255;
+col = [blue;yellow;red];
+
+
 tricolors(1,:) = [255/255,186/255,186/255];
 tricolors(2,:) = [255/255,123/255,123/255];
 tricolors(3,:) = [255/255,82/255,82/255];
+tricolors(4,:) = [221,170,51]/255;
+
 nexttile([2,3])
 hold on
 yyaxis left
-hl = plot(zeros(2001,3));
+hl = plot(zeros(size(cropPages,3),2));
 hl(1).Color = tricolors(1,:);
 hl(2).Color = tricolors(2,:);
-hl(3).Color = tricolors(3,:);
 hl(1).LineWidth = 1.5;
 hl(2).LineWidth = 1.5;
-hl(3).LineWidth = 1.5;
 hl(2).LineStyle = '-';
-hl(3).LineStyle = '-';
 yyaxis right 
 hr = plot(zeros(2001,1));
 hr.LineStyle = '-';
 hr.Color = [116/255,214/255,0];
 h = gca;
-h.XLim = [1 2001];
+h.XLim = [1 size(cropPages,3)-1];
 yyaxis left
-h.YLim = [256000 500000];
+h.YLim = [min(all_rois(:,1:2),[],'all') max(all_rois(:,1:2),[],'all')];
 h.YColor = tricolors(2,:);
 h.YLabel.String = 'Leg Fluorescence (a.u.)';
 yyaxis right
-h.YLim = [300000 4600000];
+h.YLim = [min(all_rois(:,4),[],'all') max(all_rois(:,4),[],'all')];
 h.YColor = [116/255,214/255,0];
 h.YLabel.String = 'Prob. Fluorescence (a.u.)';
 h.TickDir = 'out';
@@ -64,30 +71,34 @@ h.Color = 'k';
 h.ZColor = 'w';
 hr.LineWidth=1.5;
 set(gcf,'color','k')
-h.XTick = [0:300:2000];
-h.XTickLabel = {'0', '1','2','3','4','5','6'};
+h.XTick = [0:300:size(cropPages,3)-1];
+h.XTickLabel = [0:1:numel(h.XTick)];
 h.XLabel.String = 'Time (min)';
 box off
 hold off
 
 
-v=VideoWriter('test4.mp4','MPEG-4');
-v.Quality = 100;
-open(v);
+nexttile([2,3])
+hold on
+ht = plot(zeros(size(cropPages,3),1));
+ht.Color = tricolors(4,:);
+h=gca;
+h.LineWidth = 1.5;
+h.YLim = [min(all_rois(:,3)) max(all_rois(:,3))];
+h.YColor = tricolors(4,:);
+h.YLabel.String = 'Thorax Fluorescence (a.u.)';
+h.TickDir = 'out';
+h.XColor = 'w';
+h.Color = 'k';
+h.ZColor = 'w';
+h.XTick = [0:300:size(cropPages,3)-1];
+h.XTickLabel = [0:1:numel(h.XTick)];
+h.XLabel.String = 'Time (min)';
+h.XLim = [1 size(cropPages,3)-1];
+h.XTick = [0:300:size(cropPages,3)-1];
+h.XTickLabel = [0:1:numel(h.XTick)];
 
-for i=1:size(all_rois,1)
-    h_img.CData = cropPages(:,:,i);
-    for j=1:numel(hl)
-        hl(j).YData = all_rois(1:i,j);
-        hl(j).XData = 1:i;
-    end
-    hr.YData = all_rois(1:i,4);
-    hr.XData = 1:i;
-    frame = getframe(gcf);
-    writeVideo(v,frame);
-end
 
-close(v)
 
 %just plot
 hl(1).YData = (all_rois(:,1) - mean(all_rois(883:908,1)))./mean(all_rois(883:908,1));
@@ -97,19 +108,4 @@ yyaxis left
 h.YLim = [-0.05 1];
 yyaxis right
 hr.YData = (all_rois(:,4) - mean(all_rois(883:908,4)))./mean(all_rois(883:908,4));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

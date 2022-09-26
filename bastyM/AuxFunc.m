@@ -175,9 +175,20 @@ classdef AuxFunc
 
         end
 
-        function frames = loadMovie(moviePath,idx)
+        function frames = loadMovie(moviePath,idx,fps)
+            %loadMovie extracts corresponding frames from the video.
 
+            v = VideoReader(moviePath);
 
+            v.CurrentTime = idx(1)/fps;
+            n=1;
+            while v.CurrentTime<idx(2)/fps && hasFrame(v)
+                tmpFrame = rgb2gray(readFrame(v));
+
+                frames(:,:,n) = tmpFrame;
+
+                n=n+1;
+            end
         end
 
         function saveSpecifiedFeat(feat_name,tSnap,sNames,obj)
