@@ -24,9 +24,6 @@ toc
  rois(i) = drawpolygon('LineWidth',5,'Color','cyan');
  end
 
-
-
-
 for i=1:numel(rois)
     tmp_mask = createMask(rois(i));
     tmp_arr = arrayfun(@(x) sum(data(:,:,x).*tmp_mask,'all'),1:size(data,3));
