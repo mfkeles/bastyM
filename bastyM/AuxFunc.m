@@ -206,6 +206,15 @@ classdef AuxFunc
 
         end
 
+        function arr = subtractFirst(arr)
+            arr = arr-arr(1);
+        end
+
+        function arr = smoothRLoess(arr,bin)
+            arr = smoothdata(arr,'rloess',bin);
+        end
+
+
     end
 end
 
